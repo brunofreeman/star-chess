@@ -1,4 +1,4 @@
-from board import Board
+from entities.board import Board
 
 class State:
     board: Board

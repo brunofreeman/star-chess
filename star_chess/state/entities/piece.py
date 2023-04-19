@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import board as b
-from move import Move
-from color import Color
+from move.move import Move
+from color.color import Color
 
 class Piece(ABC):
     board: b.Board
@@ -10,6 +10,4 @@ class Piece(ABC):
 
     @abstractmethod
     def moves() -> set[Move]:
-
-
-
+        pass
