@@ -1,0 +1,13 @@
+{
+    "size": {"w": 4, "h": 5},
+    "white": {
+        "king": "c1",
+        "rook": ["d1"],
+        "sergeant": ["a2", "b2", "c2", "d2"]
+    },
+    "black": {
+        "king": "b5",
+        "rook": ["a5"],
+        "sergeant": ["a4", "b4", "c4", "d4"]
+    }
+}
