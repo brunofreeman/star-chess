@@ -7,7 +7,7 @@ from .move.coord import Coord
 
 class Board:
     board: list[list[Optional[Piece]]]
-    map: dict[Tuple[PieceType, Color], Coord] # TODO
+    map: dict[Tuple[Color, PieceType], set[Coord]]
 
     def __init__(self, spec_path: str):
         assert spec_path.endswith(".json")
@@ -42,12 +42,27 @@ class Board:
                         color,
                         Coord.from_str(loc)
                     )
+        
+        for r in range(size["h"]):
+            for c in range(size["w"]):
+                self.map_add(Coord(r, c))
+    
+    def piece_at(self, c: Coord) -> Optional[Piece]:
+        return self.board[c.r][c.c]
+
+    def map_add(self, c: Coord):
+        p = self.piece_at(c)
+
+        if p is None:
+            return
+        
+        key = (p.color, p.type)
+
+        if key not in self.map:
+            self.map[key] = set()
+
+        self.map[key].add(c)
     
     def add_piece(self, type: PieceType, color: Color, coord: Coord):
         piece = new_piece(type, color, coord)
         self.board[coord.r][coord.c] = piece
-    
-    # def coords_king(self, color: Color) -> Coord:
-    #     for piece in [p for ps in self.board for p in ps]:
-    #         if piece.color == color and isinstance(piece, King):
-    #             return piece.loc

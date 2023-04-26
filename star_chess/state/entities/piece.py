@@ -31,7 +31,6 @@ class PieceType(Enum):
             case PieceType.SERGEANT:
                 return Sergeant.__class__
 
-
 _id: int = 0
 def new_piece(type: PieceType, color: Color, loc: Coord) -> Piece:
     piece = type.to_class(color, loc. _id)
@@ -48,6 +47,10 @@ class Piece(ABC):
         self.color = color
         self.loc = loc
         self.id = id
+
+    @property
+    def type(self):
+        return PieceType.from_class(self.__class__)
 
     @abstractmethod
     def moves(self, board: list[list[Optional[Piece]]]) -> set[Move]:

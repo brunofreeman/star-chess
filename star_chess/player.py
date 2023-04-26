@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 from frontend import Frontend
-from state.color.color import Color
-from state.move.move import Move
+from state.entities.color.color import Color
+from state.entities.move.move import Move
 from state.state import State
 
 
@@ -17,4 +17,8 @@ class Player(ABC):
 
     @abstractmethod
     def play_again(self) -> bool:
+        pass
+    
+    @abstractmethod
+    def rematch_rejected(self):
         pass

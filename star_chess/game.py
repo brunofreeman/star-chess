@@ -23,7 +23,7 @@ class Game():
 
         while playing:
             self.state.reset()
-            self._play_game()
+            self._play_single_game()
 
             user_query = ThreadWithReturnValue(target=self.user.play_again)
             oppo_query = ThreadWithReturnValue(target=self.oppo.play_again)
@@ -36,9 +36,15 @@ class Game():
 
             playing = user_response and oppo_response
 
+            if not playing:
+                if user_response:
+                    self.user.rematch_rejected()
+                elif oppo_response:
+                    self.oppo.rematch_rejected()
+
         self.frontend.display_end()
     
-    def _play_game(self):
+    def _play_single_game(self):
         while (not self.state.is_game_over()):
             has_turn = self.user \
                 if self.state.has_turn is self.user.color \
