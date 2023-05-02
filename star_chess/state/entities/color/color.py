@@ -1,10 +1,15 @@
+from random import randint
 from enum import Enum
 
 
 class Color(Enum):
-    White = 0
-    Black = 1
+    WHITE = 0
+    BLACK = 1
 
     @classmethod
     def other(cls, color):
-        return cls.White if color is cls.Black else cls.Black
+        return cls.WHITE if color is cls.BLACK else cls.BLACK
+    
+    @classmethod
+    def random(cls):
+        return cls(randint(0, 1))

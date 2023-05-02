@@ -1,11 +1,14 @@
 # TODO
 
+## Bugs
+- Rook allowed moves
+
 ## ABC Implementations
 - Player
-  - CLI
-  - first-move AI
+  - networked user
+  - networked opponent
 - Frontend
-  - text GUI
+  - fancy GUI
 
 ## Stretch Goals
 - asteroids

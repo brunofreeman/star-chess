@@ -13,17 +13,20 @@ class Game():
     def __init__(self, spec: str, user: Player, oppo: Player, frontend: Frontend):
         self.user = user
         self.oppo = oppo
+        if self.user.color == self.oppo.color:
+            raise ValueError()
         self.frontend = frontend
         self.state = State(spec, user.color)
 
     def play(self):
         self.frontend.display_init(self.state)
+        self.user.msg_init()
 
         playing = True
 
         while playing:
             self.state.reset()
-            self._play_single_game()
+            self._play_round()
 
             user_query = ThreadWithReturnValue(target=self.user.play_again)
             oppo_query = ThreadWithReturnValue(target=self.oppo.play_again)
@@ -42,9 +45,11 @@ class Game():
                 elif oppo_response:
                     self.oppo.rematch_rejected()
 
+        self.user.msg_end(self.state)
         self.frontend.display_end()
     
-    def _play_single_game(self):
+    def _play_round(self):
+        self.user.msg_round()
         while (not self.state.is_game_over()):
             has_turn = self.user \
                 if self.state.has_turn is self.user.color \

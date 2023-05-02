@@ -1,7 +1,8 @@
 from typing import Optional
-from entities.board import Board
+from .entities.board import Board
 from .entities.color.color import Color
 from .entities.move.move import Move
+from .entities.piece import King
 
 
 class State:
@@ -19,15 +20,19 @@ class State:
     
     def reset(self):
         self.board = Board(self.spec)
-        self.has_turn = Color.White
+        self.has_turn = Color.WHITE
         self.turn = 0
         self.winner = None
 
+    # trusts that given move is a valid one to make
     def make_move(self, move: Move):
-        pass
+        if isinstance(self.board.piece_at(move.to), King):
+            self.winner = self.has_turn
+        self.board.move_piece(move.fr, move.to)
+        self.pass_turn()
 
     def resign_player(self, color: Color):
-        winner = Color.other(color)
+        self.winner = Color.other(color)
     
     def pass_turn(self):
         self.has_turn = Color.other(self.has_turn)
