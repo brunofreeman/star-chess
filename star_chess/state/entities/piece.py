@@ -11,6 +11,16 @@ class PieceType(Enum):
     KING = "king"
     ROOK = "rook"
     SERGEANT = "sergeant"
+    AMAZON = "amazon"
+    WAMAZON = "wamazon"
+    BISHOP = "bishop"
+    KNIGHT = "knight"
+    CAMEL = "camel"
+    WILDEBEEST = "wildebeest"
+    QUEEN = "queen"
+    CHANCELLOR = "chancellor"
+    ARCHBISHOP = "archbishop"
+    GRASSHOPPER = "grasshopper"
 
     @classmethod
     def from_class(cls, c):
@@ -20,6 +30,24 @@ class PieceType(Enum):
             return cls.ROOK
         elif isinstance(Sergeant.dummy(), c):
             return cls.SERGEANT
+        elif isinstance(Wamazon.dummy(), c):
+            return cls.WAMAZON
+        elif isinstance(Bishop.dummy(), c):
+            return cls.BISHOP
+        elif isinstance(Knight.dummy(), c):
+            return cls.KNIGHT
+        elif isinstance (Camel.dummy(), c):
+            return cls.CAMEL
+        elif isinstance(Wildebeest.dummy(), c):
+            return cls.WILDEBEEST
+        elif isinstance(Queen.dummy(), c):
+            return cls.QUEEN
+        elif isinstance(Chancellor.dummy(), c):
+            return cls.CHANCELLOR
+        elif isinstance(Archbishop.dummy(), c):
+            return cls.ARCHBISHOP
+        elif isinstance(Grasshopper.dummy(), c):
+            return cls.GRASSHOPPER
         else:
             raise ValueError()
     
@@ -31,6 +59,24 @@ class PieceType(Enum):
                 return Rook.dummy().__class__
             case PieceType.SERGEANT:
                 return Sergeant.dummy().__class__
+            case PieceType.WAMAZON:
+                return Wamazon.dummy().__class__
+            case PieceType.BISHOP:
+                return Bishop.dummy().__class__
+            case PieceType.KNIGHT:
+                return Knight.dummy().__class__
+            case PieceType.CAMEL:
+                return Camel.dummy().__class__
+            case PieceType.WILDEBEEST:
+                return Wildebeest.dummy().__class__
+            case PieceType.QUEEN:
+                return Queen.dummy().__class__
+            case PieceType.CHANCELLOR:
+                return Chancellor.dummy().__class__
+            case PieceType.ARCHBISHOP:
+                return Archbishop.dummy().__class__
+            case PieceType.GRASSHOPPER:
+                return Grasshopper.dummy().__class__
         raise ValueError()
     
     @property
@@ -42,6 +88,26 @@ class PieceType(Enum):
                 return "R"
             case PieceType.SERGEANT:
                 return "S"
+            case PieceType.AMAZON:
+                return "A"
+            case PieceType.WAMAZON:
+                return "Å"
+            case PieceType.BISHOP:
+                return "B"
+            case PieceType.KNIGHT:
+                return "N"
+            case PieceType.CAMEL:
+                return "C"
+            case PieceType.WILDEBEEST:
+                return "W"
+            case PieceType.QUEEN:
+                return "Q"
+            case PieceType.CHANCELLOR:
+                return "Č"
+            case PieceType.ARCHBISHOP:
+                return "Ã"
+            case PieceType.GRASSHOPPER:
+                return "G"
 
 
 def new_piece(type: PieceType, color: Color, loc: Coord, _id: list[int] = [0]) -> Piece:
@@ -198,6 +264,246 @@ class Sergeant(Piece):
             return None
         
         if (abs(to.c - self.loc.c) > 1):
+            return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+
+
+class Wamazon(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (
+            Rook(self.color, self.loc, None).can_move_to(board, to) or
+            Bishop(self.color, self.loc, None).can_move_to(board, to) or
+            Wildebeest(self.color, self.loc, None).can_move_to(board, to)
+        ):
+            return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+
+
+class Bishop(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
+            return None
+        
+        if color_at(board, to) == self.color:
+            return None
+        
+        dist = abs(to.r - self.loc.r)
+
+        if not (
+            dist == abs(to.c - self.loc.c) and
+            to.r != self.loc.r
+        ):
+            return None
+
+        dr = 1 if to.r > self.loc.r else -1
+        dc = 1 if to.c > self.loc.c else -1
+
+        for d in range(1, dist - 1):
+            if board[self.loc.r + dr * d][self.loc.c + dc * d] is not None:
+                return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+    
+
+class Knight(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
+            return None
+        
+        if color_at(board, to) == self.color:
+            return None
+        
+        dr = abs(self.loc.r - to.r)
+        dc = abs(self.loc.c - to.c)
+
+        if set([dr, dc]) != {1, 2}:
+            return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+
+
+class Camel(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
+            return None
+        
+        if color_at(board, to) == self.color:
+            return None
+        
+        dr = abs(self.loc.r - to.r)
+        dc = abs(self.loc.c - to.c)
+
+        if set([dr, dc]) != {1, 3}:
+            return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+
+
+class Wildebeest(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (
+            Knight(self.color, self.loc, None).can_move_to(board, to) or
+            Camel(self.color, self.loc, None).can_move_to(board, to)
+        ):
+            return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+
+
+class Queen(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (
+            Rook(self.color, self.loc, None).can_move_to(board, to) or
+            Bishop(self.color, self.loc, None).can_move_to(board, to)
+        ):
+            return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+
+
+class Chancellor(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (
+            Rook(self.color, self.loc, None).can_move_to(board, to) or
+            Knight(self.color, self.loc, None).can_move_to(board, to)
+        ):
+            return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+
+
+class Archbishop(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (
+            Bishop(self.color, self.loc, None).can_move_to(board, to) or
+            Knight(self.color, self.loc, None).can_move_to(board, to)
+        ):
+            return None
+        
+        return Move(
+            self.loc,
+            to,
+            board[to.r][to.c] is not None
+        )
+
+    def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
+        raise NotImplementedError()
+
+
+class Grasshopper(Piece):
+    color: Color
+    loc: Coord
+    id: int
+
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+        if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
+            return None
+        
+        if color_at(board, to) == self.color:
+            return None
+        
+        dr = to.r - self.loc.r
+        dr = 1 if dr > 0 else (-1 if dr < 0 else 0)
+
+        dc = to.c - self.loc.c
+        dc = 1 if dc > 0 else (-1 if dc < 0 else 0)
+
+        beforeTo = Coord(to.r - dr, to.c - dr)
+
+        beforeMove = \
+            Queen(self.color, self.loc, None).can_move_to(board, beforeTo)
+    
+        if beforeMove is None or not beforeMove.capture:
             return None
         
         return Move(
