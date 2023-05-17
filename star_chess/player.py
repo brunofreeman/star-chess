@@ -1,7 +1,7 @@
 import time
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
-from frontend import Frontend
+from frontend import Frontend, FrontendFancyGUI
 from state.entities.color.color import Color
 from state.entities.move.move import Move
 from state.entities.move.coord import Coord
@@ -108,7 +108,7 @@ class PlayerRandomAI(Player):
         self.tenacity = tenacity
 
     def get_move(self, state: State) -> Tuple[Optional[Move], bool]:
-        time.sleep(2)
+        _ = input("# press [enter] for AI move")
         
         n = int(state.board.n_squares() * self.tenacity)
 
@@ -149,3 +149,56 @@ class PlayerRandomAI(Player):
     
     def illegal(self, func):
         raise Exception(f"{self.__class__}:{func} should not be called")
+
+
+class PlayerFancyGUI(Player):
+    color: Color
+    sec_per_move: Optional[float]
+    frontend: FrontendFancyGUI
+
+    def __init__(self, color: Color, frontend: FrontendFancyGUI):
+        self.color = color
+        self.sec_per_move = None
+        self.frontend = frontend
+
+    def get_move(self, state: State) -> Tuple[Optional[Move], bool]:
+        fr = None
+        to = None
+
+        while fr is None or to is None:
+            cmd = input("$ ")
+
+            if cmd in ["self-destruct", "quit", "exit"]:
+                return None, True
+
+            fr = self.frontend.move_fr
+            to = self.frontend.move_to
+        
+        moving = state.board.piece_at(fr)
+
+        if moving is None:
+            return None, False
+        else:
+            return moving.can_move_to(state.board.board, to), False
+
+    def play_again(self) -> bool:
+        return False
+    
+    def rematch_rejected(self):
+        pass
+
+    def msg_init(self):
+        print("It's time to do battle, captain!")
+        print("Click to select which ship to move.")
+        print("Shift-click to select where to move.")
+        print("Press [enter] in the terminal to submit move.")
+        print("Illegal moves will be rejected and counted as a pass.")
+
+    def msg_round(self):
+        pass
+
+    def msg_end(self, state: State):
+        if state.winner == self.color:
+            print("Well fought, captain!")
+        else:
+            print("Retreat for now, captain!")

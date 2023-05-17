@@ -2,6 +2,8 @@
 
 ## Bugs
 - Rook allowed moves
+- Bishop jumped over a piece
+- Grasshopper didn't jump over a piece ahead two spaces in same file
 
 ## ABC Implementations
 - Player

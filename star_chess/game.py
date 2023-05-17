@@ -50,6 +50,7 @@ class Game():
     
     def _play_round(self):
         self.user.msg_round()
+        last_move = None
         while (not self.state.is_game_over()):
             has_turn = self.user \
                 if self.state.has_turn is self.user.color \
@@ -61,4 +62,5 @@ class Game():
                 self.state.pass_turn()
             else:
                 self.state.make_move(move)
-            self.frontend.display_update(self.state)
+            self.frontend.display_update(
+                self.state, set() if move is None else {move.fr, move.to})
