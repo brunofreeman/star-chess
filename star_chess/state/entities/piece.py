@@ -126,6 +126,14 @@ def color_at(board: list[list[Optional[Piece]]], r: int | Coord, c: Optional[int
         return board[r][c].color
 
 
+def img_cc(color: Color) -> str:
+    return "W" if color is Color.WHITE else "B"
+
+
+def img_wrap(filename: str) -> str:
+    return f"./img/{filename}.png"
+
+
 class Piece(ABC):
     color: Color
     loc: Coord
@@ -151,6 +159,15 @@ class Piece(ABC):
     @abstractmethod
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         pass
+
+    @property
+    @abstractmethod
+    def img_name(self) -> str:
+        pass
+
+    @property
+    def img_path(self) -> str:
+        return img_wrap(self.img_name)
 
 
 class King(Piece):
@@ -197,6 +214,10 @@ class King(Piece):
                     board[r][c] is not None
                 ))
         return mvs
+    
+    @property
+    def img_name(self) -> str:
+        return f"endurance_class_carrier({img_cc(self.color)})"
 
 
 class Rook(Piece):
@@ -244,6 +265,10 @@ class Rook(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return f"e-wing_escort({img_cc(self.color)})"
 
 
 class Sergeant(Piece):
@@ -274,6 +299,13 @@ class Sergeant(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        if self.color is Color.WHITE:
+            return "t-65_x-wing(W)"
+        else:
+            return "tie_interceptor(B)"
 
 
 class Wamazon(Piece):
@@ -297,6 +329,10 @@ class Wamazon(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return f"btl-s8_k-wing({img_cc(self.color)})"
 
 
 class Bishop(Piece):
@@ -335,6 +371,10 @@ class Bishop(Piece):
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
     
+    @property
+    def img_name(self) -> str:
+        return f"z-95_headhunter({img_cc(self.color)})"
+    
 
 class Knight(Piece):
     color: Color
@@ -362,6 +402,10 @@ class Knight(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return f"btl_y-wing({img_cc(self.color)})"
 
 
 class Camel(Piece):
@@ -390,6 +434,10 @@ class Camel(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return ""
 
 
 class Wildebeest(Piece):
@@ -412,6 +460,10 @@ class Wildebeest(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return f"btl_y-wing({img_cc(self.color)}+)"
 
 
 class Queen(Piece):
@@ -434,6 +486,10 @@ class Queen(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return f"ad-1s_modular({img_cc(self.color)})"
 
 
 class Chancellor(Piece):
@@ -456,6 +512,10 @@ class Chancellor(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return f"e-wing_escort({img_cc(self.color)}+)"
 
 
 class Archbishop(Piece):
@@ -478,6 +538,10 @@ class Archbishop(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return f"z-95_headhunter({img_cc(self.color)}+)"
 
 
 class Grasshopper(Piece):
@@ -520,3 +584,7 @@ class Grasshopper(Piece):
 
     def moves(self, board: list[list[Optional[Piece]]]) -> list[Move]:
         raise NotImplementedError()
+    
+    @property
+    def img_name(self) -> str:
+        return f"bounty_hunter_fighter({img_cc(self.color)})"
