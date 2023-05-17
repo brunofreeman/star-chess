@@ -66,8 +66,7 @@ class FrontendFancyGUI(Frontend):
     }
 
     root: tk.Tk
-    # cells: list[list[tk.Frame]]
-    img_canvases: list[list[tk.Canvas]]
+    squares: list[list[tk.Canvas]]
     imgs: list[list[Optional[ImageTk.PhotoImage]]]
     selected: Optional[Coord]
 
@@ -78,34 +77,24 @@ class FrontendFancyGUI(Frontend):
             f"{FrontendFancyGUI.window_dim[0]}x{FrontendFancyGUI.window_dim[1]}"
         )
         self.root.aspect(1, 1, 1, 1)
-        
-        # self.root.overrideredirect(True)
-        # self.root.wm_attributes('-transparentcolor','#000000')
-        # self.root.wm_attributes('-topmost', True)
 
         self.cells = []
-        self.img_canvases = []
+        self.squares = []
         self.imgs = []
         self.selected = None
     
     @property
     def cell_w(self):
-        # return self.window_dim[0] // len(self.cells[0])
-        return self.window_dim[0] // len(self.img_canvases[0])
+        return self.window_dim[0] // len(self.squares[0])
 
     @property
     def cell_h(self):
-        # return self.window_dim[1] // len(self.cells)
-        return self.window_dim[1] // len(self.img_canvases)
+        return self.window_dim[1] // len(self.squares)
     
     def coord_of_cell(self, cell: tk.Frame) -> Optional[Coord]:
-        # for r in range(len(self.cells)):
-        #     for c in range(len(self.cells[0])):
-        #         if cell is self.cells[r][c]:
-        #             return Coord(r, c)
-        for r in range(len(self.img_canvases)):
-            for c in range(len(self.img_canvases[0])):
-                if cell is self.img_canvases[r][c]:
+        for r in range(len(self.squares)):
+            for c in range(len(self.squares[0])):
+                if cell is self.squares[r][c]:
                     return Coord(r, c)
         return None
 
@@ -126,20 +115,10 @@ class FrontendFancyGUI(Frontend):
         row_start_color = Color.BLACK
         for r in range(len(state.board.board)):
             color = row_start_color
-            # self.cells.append(list())
-            self.img_canvases.append(list())
+            self.squares.append(list())
             self.imgs.append(list())
 
             for c in range(len(state.board.board[0])):
-                # self.cells[-1].append(tk.Frame(self.root))
-
-                # self.cells[-1][-1].grid(
-                #     row=r,
-                #     column=c,
-                #     padx=FrontendFancyGUI.cell_padding,
-                #     pady=FrontendFancyGUI.cell_padding,
-                #     sticky="nsew"
-                # )
 
                 background_color = (
                     FrontendFancyGUI.hex_codes[Color.WHITE][0]
@@ -147,17 +126,12 @@ class FrontendFancyGUI(Frontend):
                     FrontendFancyGUI.hex_codes[Color.BLACK][0]
                 )
 
-                # self.cells[-1][-1].configure(background=background_color)
-
-                # prevent images from resizing cells
-                # self.cells[-1][-1].pack_propagate(False)
-
-                self.img_canvases[-1].append(tk.Canvas(
+                self.squares[-1].append(tk.Canvas(
                     self.root,
                     background=background_color,
                     highlightthickness=0
                 ))
-                self.img_canvases[-1][-1].grid(
+                self.squares[-1][-1].grid(
                     row=r,
                     column=c,
                     padx=FrontendFancyGUI.cell_padding,
@@ -170,9 +144,6 @@ class FrontendFancyGUI(Frontend):
                 color = Color.other(color)
 
             row_start_color = Color.other(row_start_color)
-        
-        # for canvas in [c for row in self.img_canvases for c in row]:
-        #     canvas.configure(width=self.cell_w, height=self.cell_h)
 
         self.root.bind(
             "<Button-1>", lambda event: self.on_click(False, event))
@@ -193,14 +164,12 @@ class FrontendFancyGUI(Frontend):
                             Image.ANTIALIAS
                         )
                     )
-                    self.img_canvases[r][c].create_image(
+                    self.squares[r][c].create_image(
                         self.cell_w // 2, self.cell_h // 2,
                         image=self.imgs[r][c])
-                    # self.img_canvases[r][c].pack()
                 else:
                     self.imgs[r][c] = None
-                    self.img_canvases[r][c].delete("all")
-                    # self.img_canvases[r][c].pack_forget()
+                    self.squares[r][c].delete("all")
 
     def display_end(self):
         self.root.quit()
@@ -212,8 +181,7 @@ class FrontendFancyGUI(Frontend):
             return
 
         if self.selected is not None:
-            # cell = self.cells[self.selected.r][self.selected.c]
-            cell = self.img_canvases[self.selected.r][self.selected.c]
+            cell = self.squares[self.selected.r][self.selected.c]
             cell.configure(
                 background=FrontendFancyGUI.hex_codes[
                     self.color_of_coord(self.selected)][0]
