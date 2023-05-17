@@ -502,6 +502,12 @@ class Grasshopper(Piece):
 
         beforeMove = \
             Queen(self.color, self.loc, None).can_move_to(board, beforeTo)
+
+        # grasshopper can also jump over pieces of the same color
+        if beforeMove is None:
+            beforeMove = Queen(
+                Color.other(self.color), self.loc, None
+            ).can_move_to(board, beforeTo)
     
         if beforeMove is None or not beforeMove.capture:
             return None
