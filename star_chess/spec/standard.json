@@ -1,0 +1,29 @@
+{
+    "size": {"w": 10, "h": 10},
+    "white": {
+        "king": "f1",
+        "sergeant": ["a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3", "i3", "j3"],
+        "rook": ["a2", "a1", "j2", "j1"],
+        "bishop": ["b2", "b1", "i2", "i1"],
+        "knight": ["c2", "d2", "g2", "h2"],
+        "wildebeest": ["e2", "f2"],
+        "chancellor": ["c1"],
+        "queen": ["d1"],
+        "wamazon": ["e1"],
+        "grasshopper": ["g1"],
+        "archbishop": ["h1"]
+    },
+    "black": {
+        "king": "f10",
+        "sergeant": ["a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8", "i8", "j8"],
+        "rook": ["a9", "a10", "j9", "j10"],
+        "bishop": ["b9", "b10", "i9", "i10"],
+        "knight": ["c9", "d9", "g9", "h9"],
+        "wildebeest": ["e9", "f9"],
+        "chancellor": ["c10"],
+        "queen": ["d10"],
+        "wamazon": ["e10"],
+        "grasshopper": ["g10"],
+        "archbishop": ["h10"]
+    }
+}

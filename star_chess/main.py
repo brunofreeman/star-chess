@@ -13,7 +13,7 @@ def main(argv):
     print(f"You are playing as {user.color.name.lower()}.")
 
     game = Game(
-        "./spec/simple.json",
+        "./spec/standard.json",
         user,
         PlayerRandomAI(Color.other(user.color)),
         FrontendTextGUI()
