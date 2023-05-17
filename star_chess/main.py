@@ -1,22 +1,20 @@
 import sys
 from game import Game
 from player import PlayerCLI, PlayerRandomAI
-from frontend import FrontendTextGUI
+from frontend import FrontendFancyGUI
 from state.entities.color.color import Color
 
 
 def main(argv):
-    print("Loading game...")
-
     user = PlayerCLI(Color.random())
 
-    print(f"You are playing as {user.color.name.lower()}.")
+    print(f"You are playing as {user.color.name}.")
 
     game = Game(
         "./spec/standard.json",
         user,
         PlayerRandomAI(Color.other(user.color)),
-        FrontendTextGUI()
+        FrontendFancyGUI()
     )
 
     print("Game loaded. Starting game loop...")
