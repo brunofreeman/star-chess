@@ -5,9 +5,7 @@ let server = http.createServer(function(req, res) {
   if (req.method != "POST") {
     res.writeHead(400, {"Content-Type": "application/json"});
     res.end(JSON.stringify({
-      "msg": `Expected POST, got ${req.method}.`,
-      "req": JSON.parse(body),
-      "err": ""
+      "msg": `Expected POST, got ${req.method}.`
     }));
     return;
   }
@@ -15,9 +13,7 @@ let server = http.createServer(function(req, res) {
   if (req.headers["Content-Type"] != "application/json") {
     res.writeHead(400, {"Content-Type": "application/json"});
     res.end(JSON.stringify({
-      "msg": `Expected 'application/json', got ${req.headers["Content-Type"]}.`,
-      "req": JSON.parse(body),
-      "err": ""
+      "msg": `Expected 'application/json', got ${req.headers["Content-Type"]}.`
     }));
     return;
   }
