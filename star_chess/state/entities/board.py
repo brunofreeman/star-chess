@@ -1,5 +1,5 @@
 import json
-from tabulate import tabulate
+# from tabulate import tabulate
 from typing import Optional, Tuple
 from .piece import *
 from .color.color import Color
@@ -103,22 +103,24 @@ class Board:
         return self.n_rows() * self.n_cols()
     
     def __str__(self) -> str:
-        char_codes = [
-            [
-                " " if p is None else
-                (p.type.char_code if p.color == Color.WHITE else p.type.char_code.lower())
-                for p in row
-            ]
-            for row in self.board
-        ]
-        char_codes.reverse() # put row 0 at bottom of display
+        # char_codes = [
+        #     [
+        #         " " if p is None else
+        #         (p.type.char_code if p.color == Color.WHITE else p.type.char_code.lower())
+        #         for p in row
+        #     ]
+        #     for row in self.board
+        # ]
+        # char_codes.reverse() # put row 0 at bottom of display
 
-        with_labels = [
-            [str(len(self.board) - i), *char_codes[i]]
-            for i in range(len(self.board))
-        ]
-        with_labels.append(
-            [" ", *[chr(ord('a') + i) for i in range(len(self.board[0]))]]
-        )
+        # with_labels = [
+        #     [str(len(self.board) - i), *char_codes[i]]
+        #     for i in range(len(self.board))
+        # ]
+        # with_labels.append(
+        #     [" ", *[chr(ord('a') + i) for i in range(len(self.board[0]))]]
+        # )
         
-        return tabulate(with_labels, tablefmt="fancy_grid")
+        # return tabulate(with_labels, tablefmt="fancy_grid")
+
+        return "__str__ disabled to reduce dependencies"
