@@ -99,7 +99,7 @@ class PlayerRandomAI(Player):
         self.tenacity = tenacity
 
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
-        _ = input("# press [enter] for AI move")
+        input("# press [enter] for AI move")
         
         n = int(state.board.n_squares() * self.tenacity)
 
@@ -211,28 +211,33 @@ class PlayerOnlineFancyGUI(Player):
         return Color.other(self.color).name
 
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
-        fr = None
-        to = None
+        while True:
+            fr = None
+            to = None
 
-        while fr is None or to is None:
-            cmd = input(f"[{state.turn_no:>3d}] ")
+            while fr is None or to is None:
+                cmd = input(f"[{state.turn_no:>3d}] ")
 
-            if cmd in ["quit", "exit", "forfeit", "concede"]:
-                server_submit_special(self.username, MOVE_FORFEIT, state.turn_no)
-                return None, True
+                if cmd in ["quit", "exit", "forfeit", "concede"]:
+                    server_submit_special(self.username, MOVE_FORFEIT, state.turn_no)
+                    return None, True
 
-            fr = self.frontend.move_fr
-            to = self.frontend.move_to
-        
-        moving = state.board.piece_at(fr)
+                fr = self.frontend.move_fr
+                to = self.frontend.move_to
+            
+            moving = state.board.piece_at(fr)
 
-        if moving is None:
-            server_submit_special(self.username, MOVE_PASS, state.turn_no)
-            return None, False
-        else:
-            move = moving.can_move_to(state.board.board, to)
-            server_submit(self.username, move, state.turn_no)
-            return move, False
+            if moving is None:
+                print("There is no ship there to command!")
+            elif moving.color is not self.color:
+                print("You cannot command an enemy vessel!")
+            else:
+                move = moving.can_move_to(state.board.board, to)
+                if move is None:
+                    print("That ship cannot perform that manuever!")
+                else:
+                    server_submit(self.username, move, state.turn_no)
+                    return move, False
 
     def play_again(self) -> bool:
         return False
