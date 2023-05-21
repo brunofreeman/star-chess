@@ -215,7 +215,7 @@ class PlayerOnlineFancyGUI(Player):
         to = None
 
         while fr is None or to is None:
-            cmd = input("$ ")
+            cmd = input(f"[{state.turn_no:>3d}] ")
 
             if cmd in ["self-destruct", "quit", "exit"]:
                 server_submit_special(self.username, MOVE_FORFEIT, state.turn_no)
@@ -246,6 +246,7 @@ class PlayerOnlineFancyGUI(Player):
         print("Shift-click to select where to move.")
         print("Press [enter] in the terminal to submit move.")
         print("Illegal moves will be rejected and counted as a pass.")
+        input("Press [enter] to begin!")
 
     def msg_round(self):
         pass
@@ -268,6 +269,7 @@ class PlayerOnlineOpponent(Player):
         return self.color.name
 
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
+        print(f"[{state.turn_no:>3d}] Waiting for opponent's move...")
         return server_query(self.username, state.turn_no)
             
     def play_again(self) -> bool:

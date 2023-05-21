@@ -180,6 +180,8 @@ class FrontendFancyGUI(Frontend):
             for c in range(self.n_col):
                 if changed is not None and Coord(self.povr(r), c) not in changed:
                     continue
+                
+                self.squares[r][c].delete("all")
 
                 piece = state.board.board[self.povr(r)][c]
 
@@ -195,7 +197,6 @@ class FrontendFancyGUI(Frontend):
                         image=self.imgs[r][c])
                 else:
                     self.imgs[r][c] = None
-                    self.squares[r][c].delete("all")
 
     def on_click(self, shift_held, event: tk.Event):
         clicked_coord = self.coord_of_cell(event.widget)

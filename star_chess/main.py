@@ -12,16 +12,12 @@ def main(argv):
 
     user = PlayerOnlineFancyGUI(color, frontend)
 
-    print(f"You are playing as {color.name}.")
-
     game = Game(
         "./spec/standard.json",
         user,
         PlayerOnlineOpponent(Color.other(color)),
         frontend
     )
-
-    print("Game loaded. Starting game loop...")
 
     game.play()
 

@@ -67,7 +67,7 @@ def server_submit_special(username: str, move_special: str, move_no: int):
 
 def server_query(username: str, move_no: int) -> tuple[Optional[Move], bool]:
     while True:
-        os.system("sleep 3")
+        time.sleep(3)
 
         response = requests.post(
             POST_ENDPOINT,
