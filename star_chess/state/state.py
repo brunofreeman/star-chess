@@ -10,7 +10,7 @@ class State:
     board: Board
     pov: Color
     has_turn: Color
-    turn: int
+    turn_no: int
     winner: Optional[Color]
 
     def __init__(self, spec: str, color: Color):
@@ -21,7 +21,7 @@ class State:
     def reset(self):
         self.board = Board(self.spec)
         self.has_turn = Color.WHITE
-        self.turn = 0
+        self.turn_no = 0
         self.winner = None
 
     # trusts that given move is a valid one to make
@@ -36,7 +36,7 @@ class State:
     
     def pass_turn(self):
         self.has_turn = Color.other(self.has_turn)
-        self.turn += 1
+        self.turn_no += 1
     
     def is_game_over(self) -> bool:
         return self.winner is not None

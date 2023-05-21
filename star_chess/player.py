@@ -1,7 +1,8 @@
-import time
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
-from frontend import Frontend, FrontendFancyGUI
+from typing import Optional
+from frontend import FrontendFancyGUI
+from network import MOVE_PASS, MOVE_FORFEIT, server_clear, server_submit, \
+    server_submit_special, server_query
 from state.entities.color.color import Color
 from state.entities.move.move import Move
 from state.entities.move.coord import Coord
@@ -10,11 +11,9 @@ from state.state import State
 
 class Player(ABC):
     color: Color
-    sec_per_move: Optional[float]
-    frontend: Optional[Frontend]
 
     @abstractmethod
-    def get_move(self, state: State) -> Tuple[Optional[Move], bool]:
+    def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         pass
 
     @abstractmethod
@@ -40,15 +39,11 @@ class Player(ABC):
 
 class PlayerCLI(Player):
     color: Color
-    sec_per_move: Optional[float]
-    frontend: Optional[Frontend]
 
     def __init__(self, color: Color):
         self.color = color
-        self.sec_per_move = None
-        self.frontend = None
 
-    def get_move(self, state: State) -> Tuple[Optional[Move], bool]:
+    def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         while True:
             move_str = input("$ ")
             move_str = "".join([c for c in move_str if c != ' '])
@@ -97,17 +92,13 @@ class PlayerCLI(Player):
 
 class PlayerRandomAI(Player):
     color: Color
-    sec_per_move: Optional[float]
-    frontend: Optional[Frontend]
     tenacity: float
 
     def __init__(self, color: Color, tenacity: float = 3.0):
         self.color = color
-        self.sec_per_move = None
-        self.frontend = None
         self.tenacity = tenacity
 
-    def get_move(self, state: State) -> Tuple[Optional[Move], bool]:
+    def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         _ = input("# press [enter] for AI move")
         
         n = int(state.board.n_squares() * self.tenacity)
@@ -153,15 +144,13 @@ class PlayerRandomAI(Player):
 
 class PlayerFancyGUI(Player):
     color: Color
-    sec_per_move: Optional[float]
     frontend: FrontendFancyGUI
 
     def __init__(self, color: Color, frontend: FrontendFancyGUI):
         self.color = color
-        self.sec_per_move = None
         self.frontend = frontend
 
-    def get_move(self, state: State) -> Tuple[Optional[Move], bool]:
+    def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         fr = None
         to = None
 
@@ -202,3 +191,99 @@ class PlayerFancyGUI(Player):
             print("Well fought, captain!")
         else:
             print("Retreat for now, captain!")
+
+
+class PlayerOnlineFancyGUI(Player):
+    color: Color
+    frontend: FrontendFancyGUI
+
+    def __init__(self, color: Color, frontend: FrontendFancyGUI):
+        self.color = color
+        self.frontend = frontend
+        server_clear(self.username)
+    
+    @property
+    def username(self) -> str:
+        return self.color.name
+    
+    @property
+    def usernameOpponent(self) -> str:
+        return Color.other(self.color).name
+
+    def get_move(self, state: State) -> tuple[Optional[Move], bool]:
+        fr = None
+        to = None
+
+        while fr is None or to is None:
+            cmd = input("$ ")
+
+            if cmd in ["self-destruct", "quit", "exit"]:
+                server_submit_special(self.username, MOVE_FORFEIT, state.turn_no)
+                return None, True
+
+            fr = self.frontend.move_fr
+            to = self.frontend.move_to
+        
+        moving = state.board.piece_at(fr)
+
+        if moving is None:
+            server_submit_special(self.username, MOVE_PASS, state.turn_no)
+            return None, False
+        else:
+            move = moving.can_move_to(state.board.board, to)
+            server_submit(self.username, move, state.turn_no)
+            return move, False
+
+    def play_again(self) -> bool:
+        return False
+    
+    def rematch_rejected(self):
+        pass
+
+    def msg_init(self):
+        print("It's time to do battle, captain!")
+        print("Click to select which ship to move.")
+        print("Shift-click to select where to move.")
+        print("Press [enter] in the terminal to submit move.")
+        print("Illegal moves will be rejected and counted as a pass.")
+
+    def msg_round(self):
+        pass
+
+    def msg_end(self, state: State):
+        if state.winner == self.color:
+            print("Well fought, captain!")
+        else:
+            print("Retreat for now, captain!")
+
+
+class PlayerOnlineOpponent(Player):
+    color: Color
+
+    def __init__(self, color: Color):
+        self.color = color
+    
+    @property
+    def username(self) -> str:
+        return self.color.name
+
+    def get_move(self, state: State) -> tuple[Optional[Move], bool]:
+        return server_query(self.username, state.turn_no)
+            
+    def play_again(self) -> bool:
+        return False
+    
+    def rematch_rejected(self):
+        self.illegal(self.rematch_rejected)
+
+    def msg_init(self):
+        self.illegal(self.msg_init)
+
+    def msg_round(self):
+        self.illegal(self.msg_round)
+
+    def msg_end(self, state: State):
+        self.illegal(self.msg_end)
+    
+    def illegal(self, func):
+        raise Exception(f"{self.__class__}:{func} should not be called")

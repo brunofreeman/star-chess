@@ -13,7 +13,7 @@ class Frontend(ABC):
         pass
 
     @abstractmethod
-    def display_update(self, state: State, changed: Optional[list[Coord]]):
+    def display_update(self, state: State, changed: Optional[set[Coord]]):
         pass
 
     @abstractmethod
@@ -41,7 +41,7 @@ class FrontendTextGUI(Frontend):
         self.display_update(state)
         self.ascii_board.pack()
 
-    def display_update(self, state: State, changed: list[Coord]):
+    def display_update(self, state: State, changed: Optional[set[Coord]]):
         self.ascii_board.configure(state=tk.NORMAL)
         self.ascii_board.delete(1.0, tk.END)
         self.ascii_board.insert(tk.END, str(state.board))
@@ -168,7 +168,7 @@ class FrontendFancyGUI(Frontend):
 
         self.display_update(state, None)
 
-    def display_update(self, state: State, changed: set[Coord]):
+    def display_update(self, state: State, changed: Optional[set[Coord]]):
         if self.selected_fr is not None:
             dummy = tk.Event()
             dummy.widget = self.squares[self.selected_fr.r][self.selected_fr.c]

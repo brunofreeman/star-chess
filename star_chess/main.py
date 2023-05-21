@@ -1,21 +1,23 @@
 import sys
 from game import Game
-from player import PlayerFancyGUI, PlayerRandomAI
+from player import PlayerOnlineFancyGUI, PlayerOnlineOpponent
 from frontend import FrontendFancyGUI
 from state.entities.color.color import Color
 
 
 def main(argv):
+    color = Color(int(argv[1]))
+
     frontend = FrontendFancyGUI()
 
-    user = PlayerFancyGUI(Color.random(), frontend)
+    user = PlayerOnlineFancyGUI(color, frontend)
 
-    print(f"You are playing as {user.color.name}.")
+    print(f"You are playing as {color.name}.")
 
     game = Game(
         "./spec/standard.json",
         user,
-        PlayerRandomAI(Color.other(user.color)),
+        PlayerOnlineOpponent(Color.other(color)),
         frontend
     )
 

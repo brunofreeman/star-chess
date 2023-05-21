@@ -50,7 +50,7 @@ class Game():
     
     def _play_round(self):
         self.user.msg_round()
-        last_move = None
+
         while (not self.state.is_game_over()):
             has_turn = self.user \
                 if self.state.has_turn is self.user.color \

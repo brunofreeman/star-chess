@@ -74,17 +74,26 @@ let server = http.createServer(function(req, res) {
           let moveLogPath = logPath(username);
 
           if (!fs.existsSync(moveLogPath)) {
-            res.writeHead(400, {"content-type": "application/json"});
+            res.writeHead(404, {"content-type": "application/json"});
             res.end(JSON.stringify({
                 "msg": `No move log found for '${username}'.`,
                 "req": reqJSON(req),
-                "body": json,
-                "err": ""
+                "body": json
             }));
             return;
           }
 
           let moveLog = JSON.parse(fs.readFileSync(moveLogPath));
+
+          if (!moveLog.hasOwnProperty(key)) {
+            res.writeHead(404, {"content-type": "application/json"});
+            res.end(JSON.stringify({
+                "msg": `Move from '${username}' with key '${key}' not found in log.`,
+                "req": reqJSON(req),
+                "body": json
+            }));
+            return;
+          }
 
           let move = moveLog[key];
 

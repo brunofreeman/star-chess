@@ -77,6 +77,13 @@ match int(sys.argv[1]):
             "username": "white",
             "key": "move-003"
         }
+    
+    case 7:
+        data = {
+            "action": "query",
+            "username": "white",
+            "key": "move-999"
+        }
 
     case _:
         print(f"invalid option '{sys.argv[1]}'")
