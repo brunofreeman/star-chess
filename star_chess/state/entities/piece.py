@@ -353,14 +353,14 @@ class Bishop(Piece):
 
         if not (
             dist == abs(to.c - self.loc.c) and
-            to.r != self.loc.r
+            dist != 0
         ):
             return None
 
         dr = 1 if to.r > self.loc.r else -1
         dc = 1 if to.c > self.loc.c else -1
 
-        for d in range(1, dist - 1):
+        for d in range(1, dist):
             if board[self.loc.r + dr * d][self.loc.c + dc * d] is not None:
                 return None
         

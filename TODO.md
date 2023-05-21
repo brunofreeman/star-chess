@@ -1,8 +1,6 @@
 # TODO
 
 ## Bugs
-- Bishop
-  - can sometimes phase through other pieces
 - Grasshopper
   - not able to make most of its legal moves, sometimes can jump over two
     pieces diagonally
