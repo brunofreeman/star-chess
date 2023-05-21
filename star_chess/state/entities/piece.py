@@ -235,8 +235,10 @@ class Rook(Piece):
         dr = to.r - self.loc.r
         dc = to.c - self.loc.c
 
-        if dr == dc == 0 or not (dr == 0 or dc == 0):
+        if not ((dr == 0) ^ (dc == 0)):
             return None
+        if dr == 1 or dc == 1:
+            pass
         elif dr == 0:
             between_sta = self.loc.c + (1 if dc > 0 else -1)
             between_end = to.c - (1 if dc > 0 else -1)

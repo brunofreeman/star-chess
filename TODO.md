@@ -1,8 +1,6 @@
 # TODO
 
 ## Bugs
-- Rook
-  - problems with moving just 1 square
 - Bishop
   - can sometimes phase through other pieces
 - Grasshopper
