@@ -14,3 +14,4 @@
 - move timer
 - highlight opponent's move
 - resize icons on window resize
+- server saves old game logs by renaming with timestamp and moving to dir
