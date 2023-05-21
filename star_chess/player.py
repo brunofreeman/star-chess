@@ -249,8 +249,7 @@ class PlayerOnlineFancyGUI(Player):
         print("It's time to do battle, captain!")
         print("Click to select which ship to move.")
         print("Shift-click to select where to move.")
-        print("Press [enter] in the terminal to submit move.")
-        print("Illegal moves will be rejected and counted as a pass.")
+        print("Press [enter] in the terminal to submit the move.")
 
     def msg_round(self):
         pass
