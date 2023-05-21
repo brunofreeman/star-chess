@@ -12,7 +12,6 @@
     - pawn double move
 - quality of life
   - checking rules/checkmate rather than capture king
-  - highlight opponent's move
   - resize icons on window resize
   - server saves old game logs by renaming with timestamp and moving to dir
   - let window linger after win/loss

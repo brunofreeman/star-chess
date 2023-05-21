@@ -79,6 +79,8 @@ class FrontendFancyGUI(Frontend):
     imgs: list[list[Optional[ImageTk.PhotoImage]]]
     move_fr: Optional[Coord]
     move_to: Optional[Coord]
+    moved_to: Optional[Coord]
+    moved_fr: Optional[Coord]
 
     def __init__(self):
         self.root = tk.Tk()
@@ -88,11 +90,13 @@ class FrontendFancyGUI(Frontend):
         )
         self.root.aspect(1, 1, 1, 1)
 
-        self.cells = []
         self.squares = []
         self.imgs = []
+
         self.move_fr = None
         self.move_to = None
+        self.moved_fr = None
+        self.moved_to = None
     
     @property
     def cell_w(self):
@@ -119,6 +123,23 @@ class FrontendFancyGUI(Frontend):
 
     def set_img_at_coord(self, coord: Coord, img: ImageTk.PhotoImage):
         self.imgs[self.povr(coord.r)][self.povc(coord.c)] = img
+    
+    def deselect_coord(self, coord: Coord, override = False):
+        if not override and (
+            (self.moved_fr is not None and self.moved_fr == coord) or
+            (self.moved_to is not None and self.moved_to == coord)
+        ):
+            return
+        self.square_of_coord(coord).configure(
+            background=FrontendFancyGUI.hex_codes[
+                    self.color_of_coord(coord)][0]
+        )
+
+    def select_coord(self, coord: Coord):
+        self.square_of_coord(coord).configure(
+            background=FrontendFancyGUI.hex_codes[
+                    self.color_of_coord(coord)][1]
+        )
     
     def coord_of_cell(self, cell: tk.Frame) -> Optional[Coord]:
         for r in range(self.n_row):
@@ -182,6 +203,22 @@ class FrontendFancyGUI(Frontend):
             dummy = tk.Event()
             dummy.widget = self.square_of_coord(self.move_fr)
             self.on_click(False, dummy)
+        
+        if self.moved_fr is not None:
+            self.deselect_coord(self.moved_fr, override=True)
+            self.moved_fr = None
+        
+        if self.moved_to is not None:
+            self.deselect_coord(self.moved_to, override=True)
+            self.moved_to = None
+        
+        if changed is not None and len(changed) == 2:
+            list_changed = list(changed)
+            self.moved_fr, self.moved_to = list_changed[0], list_changed[1]
+            if state.board.board[self.moved_to.r][self.moved_to.c] is None:
+                self.moved_fr, self.moved_to = self.moved_to, self.moved_fr
+            self.select_coord(self.moved_fr)
+            self.select_coord(self.moved_to)
 
         for r in range(self.n_row):
             for c in range(self.n_col):
@@ -215,6 +252,7 @@ class FrontendFancyGUI(Frontend):
 
     def on_click(self, shift_held, event: tk.Event):
         clicked_coord = self.coord_of_cell(event.widget)
+
         if clicked_coord is None:
             return
         
@@ -223,44 +261,27 @@ class FrontendFancyGUI(Frontend):
                 return
     
             if self.move_to is not None:
-                self.square_of_coord(self.move_to).configure(
-                    background=FrontendFancyGUI.hex_codes[
-                        self.color_of_coord(self.move_to)][0]
-                )
+                self.deselect_coord(self.move_to)
 
-            self.square_of_coord(clicked_coord).configure(
-                background=FrontendFancyGUI.hex_codes[
-                        self.color_of_coord(clicked_coord)][1]
-            )
-            
+            self.select_coord(clicked_coord)            
             self.move_to = clicked_coord
             
             return
 
         if self.move_fr is not None:
-            self.square_of_coord(self.move_fr).configure(
-                background=FrontendFancyGUI.hex_codes[
-                    self.color_of_coord(self.move_fr)][0]
-            )
+            self.deselect_coord(self.move_fr)
 
             if self.move_to is not None:
-                self.square_of_coord(self.move_to).configure(
-                    background=FrontendFancyGUI.hex_codes[
-                            self.color_of_coord(self.move_to)][0]
-                )
+                self.deselect_coord(self.move_to)
                 self.move_to = None
 
-            # this was an un-select
             if self.square_of_coord(self.move_fr) is event.widget:
+                # this was an un-select
                 self.move_fr = None
                 return
         
+        self.select_coord(clicked_coord)
         self.move_fr = clicked_coord
-
-        event.widget.configure(
-            background=FrontendFancyGUI.hex_codes[
-                    self.color_of_coord(self.move_fr)][1]
-        )
 
     def display_end(self):
         self.root.quit()
