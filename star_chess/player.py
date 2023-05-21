@@ -196,20 +196,19 @@ class PlayerFancyGUI(Player):
 class PlayerOnlineFancyGUI(Player):
     color: Color
     frontend: FrontendFancyGUI
+    username: str
+    usernameOpponent: str
 
-    def __init__(self, color: Color, frontend: FrontendFancyGUI):
+    def __init__(
+            self, color: Color, frontend: FrontendFancyGUI,
+            username: Optional[str] = None, opponent: Optional[str] = None):
         self.color = color
         self.frontend = frontend
+        self.username = self.color.name if username is None else username
+        self.usernameOpponent = \
+            Color.other(self.color).name if opponent is None else opponent
         server_clear(self.username)
     
-    @property
-    def username(self) -> str:
-        return self.color.name
-    
-    @property
-    def usernameOpponent(self) -> str:
-        return Color.other(self.color).name
-
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         while True:
             fr = None
@@ -263,13 +262,11 @@ class PlayerOnlineFancyGUI(Player):
 
 class PlayerOnlineOpponent(Player):
     color: Color
+    username: str
 
-    def __init__(self, color: Color):
+    def __init__(self, color: Color, username: Optional[str] = None):
         self.color = color
-    
-    @property
-    def username(self) -> str:
-        return self.color.name
+        self.username = self.color.name if username is None else username
 
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         print(f"[{state.turn_no:>3d}] Waiting for opponent's move...")

@@ -16,7 +16,6 @@
   - server saves old game logs by renaming with timestamp and moving to dir
   - let window linger after win/loss
 - other
-  - username input to allow more than one simultaneous game
   - move timer
   - change king icon to CR90 corvette
   - change icons to have background disk (semi-transparent?)
