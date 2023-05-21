@@ -48,7 +48,7 @@ class PlayerCLI(Player):
             move_str = input("$ ")
             move_str = "".join([c for c in move_str if c != ' '])
 
-            if move_str in ["self-destruct", "quit", "exit"]:
+            if move_str in ["quit", "exit", "forfeit", "concede"]:
                 return None, True
             
             coord_strs = move_str.split('>')
@@ -157,7 +157,7 @@ class PlayerFancyGUI(Player):
         while fr is None or to is None:
             cmd = input("$ ")
 
-            if cmd in ["self-destruct", "quit", "exit"]:
+            if cmd in ["quit", "exit", "forfeit", "concede"]:
                 return None, True
 
             fr = self.frontend.move_fr
@@ -217,7 +217,7 @@ class PlayerOnlineFancyGUI(Player):
         while fr is None or to is None:
             cmd = input(f"[{state.turn_no:>3d}] ")
 
-            if cmd in ["self-destruct", "quit", "exit"]:
+            if cmd in ["quit", "exit", "forfeit", "concede"]:
                 server_submit_special(self.username, MOVE_FORFEIT, state.turn_no)
                 return None, True
 
@@ -246,7 +246,6 @@ class PlayerOnlineFancyGUI(Player):
         print("Shift-click to select where to move.")
         print("Press [enter] in the terminal to submit move.")
         print("Illegal moves will be rejected and counted as a pass.")
-        input("Press [enter] to begin!")
 
     def msg_round(self):
         pass

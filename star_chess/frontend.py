@@ -197,6 +197,8 @@ class FrontendFancyGUI(Frontend):
                         image=self.imgs[r][c])
                 else:
                     self.imgs[r][c] = None
+                
+                self.squares[r][c].update()
 
     def on_click(self, shift_held, event: tk.Event):
         clicked_coord = self.coord_of_cell(event.widget)
