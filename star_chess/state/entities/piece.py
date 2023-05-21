@@ -237,26 +237,32 @@ class Rook(Piece):
 
         if not ((dr == 0) ^ (dc == 0)):
             return None
-        if dr == 1 or dc == 1:
+        if abs(dr) == 1 or abs(dc) == 1:
             pass
-        elif dr == 0:
-            between_sta = self.loc.c + (1 if dc > 0 else -1)
-            between_end = to.c - (1 if dc > 0 else -1)
+        else:
+            between_sta = (
+                self.loc.c + (1 if dc > 0 else -1)
+                if dr == 0 else
+                self.loc.r + (1 if dr > 0 else -1)
+            )
+            between_end = (
+                to.c - (1 if dc > 0 else -1)
+                if dr == 0 else
+                to.r - (1 if dr > 0 else -1)
+            )
+            rank_or_file = (
+                board[to.r]
+                if dr == 0 else
+                [board[r][to.c] for r in range(len(board))]
+            )
 
             if between_sta > between_end:
                 between_sta, between_end = between_end, between_sta
             
-            if any(p is not None for p in board[to.r][between_sta:(between_end + 1)]):
-                return None
-        elif dc == 0:
-            between_sta = self.loc.r + (1 if dr > 0 else -1)
-            between_end = to.r - (1 if dr > 0 else -1)
-            if between_sta > between_end:
-                between_sta, between_end = between_end, between_sta
-
-            col = [board[r][to.c] for r in range(len(board))]
-            
-            if any(p is not None for p in col[between_sta:(between_end + 1)]):
+            if any(
+                p is not None
+                for p in rank_or_file[between_sta:(between_end + 1)]
+            ):
                 return None
 
         return Move(
@@ -557,14 +563,19 @@ class Grasshopper(Piece):
         
         if color_at(board, to) == self.color:
             return None
+
+        def sgn(x):
+            if x < 0:
+                return -1
+            elif x == 0:
+                return 0
+            else:
+                return 1
         
-        dr = to.r - self.loc.r
-        dr = 1 if dr > 0 else (-1 if dr < 0 else 0)
+        dr = sgn(to.r - self.loc.r)
+        dc = sgn(to.c - self.loc.c)
 
-        dc = to.c - self.loc.c
-        dc = 1 if dc > 0 else (-1 if dc < 0 else 0)
-
-        beforeTo = Coord(to.r - dr, to.c - dr)
+        beforeTo = Coord(to.r - dr, to.c - dc)
 
         beforeMove = \
             Queen(self.color, self.loc, None).can_move_to(board, beforeTo)

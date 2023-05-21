@@ -1,9 +1,6 @@
 # TODO
 
 ## Bugs
-- Grasshopper
-  - not able to make most of its legal moves, sometimes can jump over two
-    pieces diagonally
 - Windows: could select more than two squares
 - Linux: board doesn't scale with window
 - columns are displayed mirrored between the two clients
