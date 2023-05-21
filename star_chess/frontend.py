@@ -77,7 +77,6 @@ class FrontendFancyGUI(Frontend):
     n_col: int
     squares: list[list[tk.Canvas]]
     imgs: list[list[Optional[ImageTk.PhotoImage]]]
-    selected_fr: Optional[Coord]
     move_fr: Optional[Coord]
     move_to: Optional[Coord]
 
@@ -92,7 +91,6 @@ class FrontendFancyGUI(Frontend):
         self.cells = []
         self.squares = []
         self.imgs = []
-        self.selected_fr = None
         self.move_fr = None
         self.move_to = None
     
@@ -107,11 +105,26 @@ class FrontendFancyGUI(Frontend):
     def povr(self, r):
         return r if self.pov is Color.BLACK else (self.n_row - 1 - r)
     
+    def povc(self, c):
+        return c if self.pov is Color.BLACK else (self.n_col - 1 - c)
+
+    def povrc(self, coord: Coord):
+        return Coord(self.povr(coord.r), self.povc(coord.c))
+    
+    def square_of_coord(self, coord: Coord) -> tk.Canvas:
+        return self.squares[self.povr(coord.r)][self.povc(coord.c)]
+
+    def img_of_coord(self, coord: Coord) -> ImageTk.PhotoImage:
+        return self.imgs[self.povr(coord.r)][self.povc(coord.c)]
+
+    def set_img_at_coord(self, coord: Coord, img: ImageTk.PhotoImage):
+        self.imgs[self.povr(coord.r)][self.povc(coord.c)] = img
+    
     def coord_of_cell(self, cell: tk.Frame) -> Optional[Coord]:
         for r in range(self.n_row):
             for c in range(self.n_col):
                 if cell is self.squares[r][c]:
-                    return Coord(r, c)
+                    return self.povrc(Coord(r, c))
         return None
 
     @staticmethod
@@ -140,11 +153,7 @@ class FrontendFancyGUI(Frontend):
             for c in range(self.n_col):
                 color = FrontendFancyGUI.color_of_coord(Coord(r, c))
 
-                background_color = (
-                    FrontendFancyGUI.hex_codes[Color.WHITE][0]
-                    if color is Color.WHITE else
-                    FrontendFancyGUI.hex_codes[Color.BLACK][0]
-                )
+                background_color = FrontendFancyGUI.hex_codes[color][0]
 
                 self.squares[-1].append(tk.Canvas(
                     self.root,
@@ -169,36 +178,40 @@ class FrontendFancyGUI(Frontend):
         self.display_update(state, None)
 
     def display_update(self, state: State, changed: Optional[set[Coord]]):
-        if self.selected_fr is not None:
+        if self.move_fr is not None:
             dummy = tk.Event()
-            dummy.widget = self.squares[self.selected_fr.r][self.selected_fr.c]
+            dummy.widget = self.square_of_coord(self.move_fr)
             self.on_click(False, dummy)
-        self.move_fr = None
-        self.move_to = None
 
         for r in range(self.n_row):
             for c in range(self.n_col):
-                if changed is not None and Coord(self.povr(r), c) not in changed:
+                coord = Coord(r, c)
+
+                if changed is not None and coord not in changed:
                     continue
                 
-                self.squares[r][c].delete("all")
+                self.square_of_coord(coord).delete("all")
 
-                piece = state.board.board[self.povr(r)][c]
+                piece = state.board.board[r][c]
 
                 if piece is not None:
-                    self.imgs[r][c] = ImageTk.PhotoImage(
-                        Image.open(piece.img_path).resize(
-                            (self.cell_w, self.cell_h),
-                            Image.ANTIALIAS
+                    self.set_img_at_coord(
+                        coord,
+                        ImageTk.PhotoImage(
+                            Image.open(piece.img_path).resize(
+                                (self.cell_w, self.cell_h),
+                                Image.ANTIALIAS
+                            )
                         )
                     )
-                    self.squares[r][c].create_image(
+                    self.square_of_coord(coord).create_image(
                         self.cell_w // 2, self.cell_h // 2,
-                        image=self.imgs[r][c])
+                        image=self.img_of_coord(coord)
+                    )
                 else:
-                    self.imgs[r][c] = None
+                    self.set_img_at_coord(coord, None)
                 
-                self.squares[r][c].update()
+                self.square_of_coord(coord).update()
 
     def on_click(self, shift_held, event: tk.Event):
         clicked_coord = self.coord_of_cell(event.widget)
@@ -206,43 +219,47 @@ class FrontendFancyGUI(Frontend):
             return
         
         if shift_held:
-            if self.selected_fr is None or clicked_coord == self.selected_fr:
+            if self.move_fr is None or clicked_coord == self.move_fr:
                 return
-            self.squares[clicked_coord.r][clicked_coord.c].configure(
+    
+            if self.move_to is not None:
+                self.square_of_coord(self.move_to).configure(
+                    background=FrontendFancyGUI.hex_codes[
+                        self.color_of_coord(self.move_to)][0]
+                )
+
+            self.square_of_coord(clicked_coord).configure(
                 background=FrontendFancyGUI.hex_codes[
                         self.color_of_coord(clicked_coord)][1]
             )
-            self.move_fr = Coord(
-                self.povr(self.selected_fr.r), self.selected_fr.c)
-            self.move_to = Coord(
-                self.povr(clicked_coord.r), clicked_coord.c)
+            
+            self.move_to = clicked_coord
+            
             return
 
-        if self.selected_fr is not None:
-            cell_fr = self.squares[self.selected_fr.r][self.selected_fr.c]
-            cell_fr.configure(
+        if self.move_fr is not None:
+            self.square_of_coord(self.move_fr).configure(
                 background=FrontendFancyGUI.hex_codes[
-                    self.color_of_coord(self.selected_fr)][0]
+                    self.color_of_coord(self.move_fr)][0]
             )
 
             if self.move_to is not None:
-                crd = Coord(self.povr(self.move_to.r), self.move_to.c)
-                self.squares[crd.r][crd.c].configure(
+                self.square_of_coord(self.move_to).configure(
                     background=FrontendFancyGUI.hex_codes[
-                            self.color_of_coord(crd)][0]
+                            self.color_of_coord(self.move_to)][0]
                 )
-                self.move_fr = None
                 self.move_to = None
 
-            if cell_fr is event.widget:
-                self.selected_fr = None
+            # this was an un-select
+            if self.square_of_coord(self.move_fr) is event.widget:
+                self.move_fr = None
                 return
         
-        self.selected_fr = clicked_coord
+        self.move_fr = clicked_coord
 
         event.widget.configure(
             background=FrontendFancyGUI.hex_codes[
-                    self.color_of_coord(self.selected_fr)][1]
+                    self.color_of_coord(self.move_fr)][1]
         )
 
     def display_end(self):

@@ -1,9 +1,7 @@
 # TODO
 
 ## Bugs
-- Windows: could select more than two squares
 - Linux: board doesn't scale with window
-- columns are displayed mirrored between the two clients
 
 ## Stretch Goals
 - new game features
