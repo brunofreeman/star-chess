@@ -217,7 +217,7 @@ class King(Piece):
     
     @property
     def img_name(self) -> str:
-        return f"endurance_class_carrier({img_cc(self.color)})"
+        return f"cr90_corvette({img_cc(self.color)})"
 
 
 class Rook(Piece):

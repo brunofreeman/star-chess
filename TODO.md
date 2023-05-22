@@ -5,6 +5,8 @@
 
 ## Stretch Goals
 - new game features
+  - move timer
+  - chat functionality
   - asteroids
   - special moves
     - castling
@@ -15,8 +17,3 @@
   - server saves old game logs by renaming with timestamp and moving to dir
   - let window linger after win/loss
   - show board notation
-- other
-  - move timer
-  - change king icon to CR90 corvette
-  - mirror icons to all face left
-  - change icons to have background disk (semi-transparent?)

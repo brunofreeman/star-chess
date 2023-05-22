@@ -66,12 +66,12 @@ class FrontendFancyGUI(Frontend):
         # (default, selected)
 
         # Chess.com brown
-        # Color.WHITE: ("#f0d9b5", "#f8ec5a"),
-        # Color.BLACK: ("#b58863", "#dac431"),
+        Color.WHITE: ("#f0d9b5", "#f8ec5a"),
+        Color.BLACK: ("#b58863", "#dac431"),
 
         # Chess.com green
-        Color.WHITE: ("#eeeed3", "#f8f685"),
-        Color.BLACK: ("#769656", "#bbc93f"),
+        # Color.WHITE: ("#eeeed3", "#f8f685"),
+        # Color.BLACK: ("#769656", "#bbc93f"),
     }
 
     root: tk.Tk
