@@ -18,4 +18,5 @@
 - other
   - move timer
   - change king icon to CR90 corvette
+  - mirror icons to all face left
   - change icons to have background disk (semi-transparent?)
