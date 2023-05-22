@@ -54,7 +54,10 @@ class FrontendTextGUI(Frontend):
 
 
 class FrontendFancyGUI(Frontend):
-    window_dim: tuple[int, int] = (800, 800)
+    app_name: str = "Star Chess"
+
+    # width x height
+    init_dim: tuple[int, int] = (800, 800)
 
     cell_padding: int = 0
     cell_weight: int = 1
@@ -81,12 +84,15 @@ class FrontendFancyGUI(Frontend):
     move_to: Optional[Coord]
     moved_to: Optional[Coord]
     moved_fr: Optional[Coord]
+    prev_window_size: tuple[int, int]
+    window_resized: bool
+    loaded: bool
 
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Star Chess")
+        self.root.title(FrontendFancyGUI.app_name)
         self.root.geometry(
-            f"{FrontendFancyGUI.window_dim[0]}x{FrontendFancyGUI.window_dim[1]}"
+            f"{FrontendFancyGUI.init_dim[0]}x{FrontendFancyGUI.init_dim[1]}"
         )
         self.root.aspect(1, 1, 1, 1)
 
@@ -97,14 +103,26 @@ class FrontendFancyGUI(Frontend):
         self.move_to = None
         self.moved_fr = None
         self.moved_to = None
+
+        self.prev_window_size = FrontendFancyGUI.init_dim
+        self.window_resized = False
+        self.loaded = False
     
     @property
     def cell_w(self):
-        return self.window_dim[0] // self.n_col
+        return (
+            self.root.winfo_width()
+            if self.loaded else
+            FrontendFancyGUI.init_dim[0]
+        ) // self.n_col
 
     @property
     def cell_h(self):
-        return self.window_dim[1] // self.n_row
+        return (
+            self.root.winfo_height()
+            if self.loaded else
+            FrontendFancyGUI.init_dim[1]
+        ) // self.n_row
     
     def povr(self, r):
         return r if self.pov is Color.BLACK else (self.n_row - 1 - r)
@@ -195,6 +213,8 @@ class FrontendFancyGUI(Frontend):
             "<Button-1>", lambda event: self.on_click(False, event))
         self.root.bind(
             "<Shift-Button-1>", lambda event: self.on_click(True, event))
+        
+        self.root.bind("<Configure>", self.on_configure)
 
         self.display_update(state, None)
 
@@ -203,7 +223,7 @@ class FrontendFancyGUI(Frontend):
             dummy = tk.Event()
             dummy.widget = self.square_of_coord(self.move_fr)
             self.on_click(False, dummy)
-        
+
         if self.moved_fr is not None:
             self.deselect_coord(self.moved_fr, override=True)
             self.moved_fr = None
@@ -219,6 +239,10 @@ class FrontendFancyGUI(Frontend):
                 self.moved_fr, self.moved_to = self.moved_to, self.moved_fr
             self.select_coord(self.moved_fr)
             self.select_coord(self.moved_to)
+        
+        if self.window_resized:
+            changed = None # force updating all icons
+            self.window_resized = False
 
         for r in range(self.n_row):
             for c in range(self.n_col):
@@ -249,6 +273,8 @@ class FrontendFancyGUI(Frontend):
                     self.set_img_at_coord(coord, None)
                 
                 self.square_of_coord(coord).update()
+        
+        self.loaded = True
 
     def on_click(self, shift_held, event: tk.Event):
         clicked_coord = self.coord_of_cell(event.widget)
@@ -282,7 +308,18 @@ class FrontendFancyGUI(Frontend):
         
         self.select_coord(clicked_coord)
         self.move_fr = clicked_coord
+    
+    def on_configure(self, event):
+        if not self.loaded:
+            return
 
+        # this check is needed because on_configure will also fire for moving
+        # the window without resizing
+        curr_window_size = (self.root.winfo_width(), self.root.winfo_height())
+        if curr_window_size != self.prev_window_size:
+            self.prev_window_size = curr_window_size
+            self.window_resized = True
+            
     def display_end(self):
         self.root.quit()
         self.root.destroy()
