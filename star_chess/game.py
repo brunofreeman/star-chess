@@ -20,7 +20,7 @@ class Game():
 
     def play(self):
         self.frontend.display_init(self.state)
-        self.user.msg_init()
+        self.user.game_begin()
 
         playing = True
 
@@ -45,11 +45,11 @@ class Game():
                 elif oppo_response:
                     self.oppo.rematch_rejected()
 
-        self.user.msg_end(self.state)
+        self.user.game_end(self.state)
         self.frontend.display_end()
     
     def _play_round(self):
-        self.user.msg_round()
+        self.user.round_begin()
 
         while (not self.state.is_game_over()):
             has_turn = self.user \
@@ -64,3 +64,5 @@ class Game():
                 self.state.make_move(move)
             self.frontend.display_update(
                 self.state, set() if move is None else {move.fr, move.to})
+        
+        self.user.round_end()

@@ -53,6 +53,13 @@ def server_submit(username: str, move: Optional[Move], move_no: int):
         })
 
 
+def server_save(username: str):
+    server_ok_or_fail({
+        "action": "save",
+        "username": username
+    })
+
+
 def server_submit_special(username: str, move_special: str, move_no: int):
     if move_special not in (MOVE_PASS, MOVE_FORFEIT):
         raise ValueError(move_special)

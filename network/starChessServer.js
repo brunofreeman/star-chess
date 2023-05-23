@@ -119,6 +119,33 @@ let server = http.createServer(function(req, res) {
           }));
         } break;
 
+        case "save": {
+          let username = json["username"];
+          let moveLogPath = logPath(username);
+
+          if (fs.existsSync(moveLogPath)) {
+            let savedLogsDir = "saved-logs";
+            if (!fs.existsSync(savedLogsDir)) {
+              fs.mkdirSync(savedLogsDir);
+            }
+            
+            fs.copyFileSync(
+              moveLogPath, `${savedLogsDir}/${Date.now()}-${moveLogPath}`);
+
+            res.writeHead(200, {"content-type": "application/json"});
+            res.end(JSON.stringify({
+              "msg": `Move log for '${username}' successfully saved.`
+            }));
+          } else {
+            res.writeHead(400, {"content-type": "application/json"});
+            res.end(JSON.stringify({
+                "msg": `No log found for '${username}' to save.`,
+                "req": reqJSON(req),
+                "body": json
+            }));
+          }
+        } break;
+
         default: {
           res.writeHead(400, {"content-type": "application/json"});
           res.end(JSON.stringify({

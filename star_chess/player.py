@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from frontend import FrontendFancyGUI
 from network import MOVE_PASS, MOVE_FORFEIT, server_clear, server_submit, \
-    server_submit_special, server_query
+    server_submit_special, server_query, server_save
 from state.entities.color.color import Color
 from state.entities.move.move import Move
 from state.entities.move.coord import Coord
@@ -25,16 +25,21 @@ class Player(ABC):
         pass
     
     @abstractmethod
-    def msg_init(self):
+    def game_begin(self):
         pass
 
     @abstractmethod
-    def msg_round(self):
+    def game_end(self, state: State):
         pass
 
     @abstractmethod
-    def msg_end(self, state: State):
+    def round_begin(self):
         pass
+
+    @abstractmethod
+    def round_end(self):
+        pass
+
 
 
 class PlayerCLI(Player):
@@ -75,15 +80,15 @@ class PlayerCLI(Player):
     def rematch_rejected(self):
         pass
 
-    def msg_init(self):
+    def game_begin(self):
         print("It's time to do battle, captain!")
         print("Input ship maneuvers using \"from > to\" format.")
         print("Specify \"from\" and \"to\" in standard chess notation.")
 
-    def msg_round(self):
+    def round_begin(self):
         pass
 
-    def msg_end(self, state: State):
+    def game_end(self, state: State):
         if state.winner == self.color:
             print("Well fought, captain!")
         else:
@@ -129,14 +134,17 @@ class PlayerRandomAI(Player):
     def rematch_rejected(self):
         self.illegal(self.rematch_rejected)
 
-    def msg_init(self):
-        self.illegal(self.msg_init)
+    def game_begin(self):
+        self.illegal(self.game_begin)
 
-    def msg_round(self):
-        self.illegal(self.msg_round)
+    def game_end(self, state: State):
+        self.illegal(self.game_end)
 
-    def msg_end(self, state: State):
-        self.illegal(self.msg_end)
+    def round_begin(self):
+        self.illegal(self.round_begin)
+
+    def round_end(self):
+        self.illegal(self.round_end)
     
     def illegal(self, func):
         raise Exception(f"{self.__class__}:{func} should not be called")
@@ -176,21 +184,24 @@ class PlayerFancyGUI(Player):
     def rematch_rejected(self):
         pass
 
-    def msg_init(self):
+    def game_begin(self):
         print("It's time to do battle, captain!")
         print("Click to select which ship to move.")
         print("Shift-click to select where to move.")
         print("Press [enter] in the terminal to submit move.")
         print("Illegal moves will be rejected and counted as a pass.")
 
-    def msg_round(self):
-        pass
-
-    def msg_end(self, state: State):
+    def game_end(self, state: State):
         if state.winner == self.color:
             print("Well fought, captain!")
         else:
             print("Retreat for now, captain!")
+
+    def round_begin(self):
+        pass
+
+    def round_end(self):
+        pass
 
 
 class PlayerOnlineFancyGUI(Player):
@@ -244,20 +255,23 @@ class PlayerOnlineFancyGUI(Player):
     def rematch_rejected(self):
         pass
 
-    def msg_init(self):
+    def game_begin(self):
         print("It's time to do battle, captain!")
         print("Click to select which ship to move.")
         print("Shift-click to select where to move.")
         print("Press [enter] in the terminal to submit the move.")
 
-    def msg_round(self):
-        pass
-
-    def msg_end(self, state: State):
+    def game_end(self, state: State):
         if state.winner == self.color:
             print("Well fought, captain!")
         else:
             print("Retreat for now, captain!")
+
+    def round_begin(self):
+        pass
+
+    def round_end(self):
+        server_save(self.username)
 
 
 class PlayerOnlineOpponent(Player):
@@ -278,14 +292,17 @@ class PlayerOnlineOpponent(Player):
     def rematch_rejected(self):
         self.illegal(self.rematch_rejected)
 
-    def msg_init(self):
-        self.illegal(self.msg_init)
+    def game_begin(self):
+        self.illegal(self.game_begin)
 
-    def msg_round(self):
-        self.illegal(self.msg_round)
+    def game_end(self, state: State):
+        self.illegal(self.game_end)
 
-    def msg_end(self, state: State):
-        self.illegal(self.msg_end)
+    def round_begin(self):
+        self.illegal(self.round_begin)
+
+    def round_end(self):
+        self.illegal(self.round_end)
     
     def illegal(self, func):
         raise Exception(f"{self.__class__}:{func} should not be called")
