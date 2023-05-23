@@ -11,7 +11,6 @@
   - special moves
     - castling
     - hyperdrive
-    - pawn double move
 - quality of life
   - checking rules/checkmate rather than capture king
   - server saves old game logs by renaming with timestamp and moving to dir

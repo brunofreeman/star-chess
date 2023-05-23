@@ -293,6 +293,25 @@ class Sergeant(Piece):
         
         dir = 1 if self.color is Color.WHITE else -1
 
+        # special case: double-move on first (cannot capture nor jump)
+        hasnt_moved = self.loc.r == (
+            2 if self.color is Color.WHITE else len(board) - 3
+        )
+        if hasnt_moved and to.r == self.loc.r + 2 * dir:
+            dc = to.c - self.loc.c
+            c_step = dc // 2
+            if (
+                dc in [-2, 0, 2] and
+                board[to.r - dir][to.c - c_step] is None and
+                board[to.r][to.c] is None
+            ):
+                return Move(
+                    self.loc,
+                    to,
+                    board[to.r][to.c] is not None
+                )
+            
+
         if to.r != self.loc.r + dir:
             return None
         
