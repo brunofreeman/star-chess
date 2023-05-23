@@ -34,8 +34,8 @@ def parse_args(argv):
         if argv[2] == "--username=" or argv[3] == "--opponent":
             usage(argv)
         
-        username = argv[2].split("--username")[1]
-        opponent = argv[3].split("--opponent")[1]
+        username = argv[2].split("--username")[1][1:]
+        opponent = argv[3].split("--opponent")[1][1:]
 
     return color, username, opponent
 
