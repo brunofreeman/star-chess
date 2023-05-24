@@ -47,8 +47,11 @@ class Board:
                         Coord.from_str(loc)
                     )
     
-    def piece_at(self, c: Coord) -> Optional[Piece]:
-        return self.board[c.r][c.c]
+    def piece_at(self, x: Coord | int, c: Optional[int] = None) -> Optional[Piece]:
+        if isinstance(x, Coord):
+            return self.board[x.r][x.c]
+        else:
+            return self.board[x][c]
 
     def _map_add(self, c: Coord):
         p = self.piece_at(c)
@@ -93,15 +96,58 @@ class Board:
         # insert moving piece at new location
         self.add_piece(moving.type, moving.color, to)
     
+    @property
     def n_rows(self) -> int:
         return len(self.board)
     
+    @property
     def n_cols(self) -> int:
         return len(self.board[0])
 
     def n_squares(self) -> int:
-        return self.n_rows() * self.n_cols()
+        return self.n_rows * self.n_cols
     
+    def exists_check(self, color: Color) -> bool:
+        king = None
+
+        for r in range(self.n_rows):
+            for c in range(self.n_cols):
+                p = self.piece_at(r, c)
+                if isinstance(p, King) and p.color is color:
+                    king = p
+                    break
+            else:
+                continue
+            break
+        
+        if king is None:
+            raise ValueError(self.board)
+        
+        return any(
+            any(
+                self.piece_at(r, c) is not None and
+                self.piece_at(r, c).can_move_to(
+                    self.board, king.loc
+                )
+                for c in range(self.n_cols)
+            )
+            for r in range(self.n_rows)
+        )
+
+    def exists_check_after_move(self, color: Color, move: Move) -> bool:
+        restore = self.piece_at(move.to)
+
+        self.move_piece(move.fr, move.to)
+        
+        check_exists = self.exists_check(color)
+
+        self.move_piece(move.to, move.fr)
+
+        if restore is not None:
+            self.add_piece(restore.type, restore.color, restore.loc)
+        
+        return check_exists
+        
     def __str__(self) -> str:
         # char_codes = [
         #     [

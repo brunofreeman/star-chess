@@ -12,6 +12,6 @@
     - castling
     - hyperdrive
 - quality of life
-  - checking rules/checkmate rather than capture king
+  - checkmate detection
   - let window linger after win/loss
   - show board notation

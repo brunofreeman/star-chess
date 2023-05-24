@@ -224,30 +224,51 @@ class PlayerOnlineFancyGUI(Player):
         while True:
             fr = None
             to = None
+            attempted_cmd = False
+            check_move = False
+            cmd = ""
+            
 
             while fr is None or to is None:
+                check_move = False
+
                 cmd = input(f"[{state.turn_no:>3d}] ")
 
-                if cmd in ["quit", "exit", "forfeit", "concede"]:
-                    server_submit_special(self.username, MOVE_FORFEIT, state.turn_no)
+                attempted_cmd = cmd.startswith(":")
+
+                if cmd in [":exit", ":quit"]:
+                    server_submit_special(
+                        self.username, MOVE_FORFEIT, state.turn_no)
                     return None, True
+                elif cmd == ":check":
+                    check_move = True
 
                 fr = self.frontend.move_fr
                 to = self.frontend.move_to
             
             moving = state.board.piece_at(fr)
+            move = None if moving is None else moving.can_move_to(
+                state.board.board, to)
 
             if moving is None:
                 print("There is no ship there to command!")
             elif moving.color is not self.color:
                 print("You cannot command an enemy vessel!")
+            elif move is None:
+                print("That ship cannot perform that manuever!")
+            elif state.board.exists_check_after_move(self.color, move):
+                print("That manuever would leave your primary vessel under attack!")
+            elif check_move:
+                print("That's a valid manuever, captain!")
+            elif attempted_cmd:
+                print(f"Command '{cmd[1:]}' not recognized!")
             else:
-                move = moving.can_move_to(state.board.board, to)
-                if move is None:
-                    print("That ship cannot perform that manuever!")
-                else:
-                    server_submit(self.username, move, state.turn_no)
-                    return move, False
+                if state.board.exists_check_after_move(
+                    Color.other(self.color), move
+                ):
+                    print("You've put the enemy's primary vessel under attack!")
+                server_submit(self.username, move, state.turn_no)
+                return move, False
 
     def play_again(self) -> bool:
         return False
@@ -284,7 +305,15 @@ class PlayerOnlineOpponent(Player):
 
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         print(f"[{state.turn_no:>3d}] Waiting for opponent's move...")
-        return server_query(self.username, state.turn_no)
+        move, resign = server_query(self.username, state.turn_no)
+        if (
+            move is not None and
+            state.board.exists_check_after_move(Color.other(self.color), move)
+        ):
+            print("Your primary vessel is under attack, captain!")
+            print("You must perform evasive manuevers!")
+        return move, resign
+
             
     def play_again(self) -> bool:
         return False
