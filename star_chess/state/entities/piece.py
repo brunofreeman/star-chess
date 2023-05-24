@@ -305,11 +305,7 @@ class Sergeant(Piece):
                 board[to.r - dir][to.c - c_step] is None and
                 board[to.r][to.c] is None
             ):
-                return Move(
-                    self.loc,
-                    to,
-                    board[to.r][to.c] is not None
-                )
+                return Move(self.loc, to, False)
             
 
         if to.r != self.loc.r + dir:
