@@ -14,6 +14,7 @@ class Move:
     to: Coord
     capture: bool
     special: Optional[SpecialMove] = None
+    msg: Optional[str] = None
 
     def __str__(self) -> str:
         return f"{self.fr} > {self.to} [{'x' if self.capture else ' '}]"

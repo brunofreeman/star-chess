@@ -6,7 +6,6 @@
 ## Stretch Goals
 - new game features
   - move timer
-  - chat functionality
   - asteroids
   - special moves
     - castling

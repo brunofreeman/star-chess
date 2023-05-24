@@ -227,6 +227,7 @@ class PlayerOnlineFancyGUI(Player):
             attempted_cmd = False
             test_move = False
             cmd = ""
+            msg = None
             
 
             while fr is None or to is None:
@@ -234,7 +235,7 @@ class PlayerOnlineFancyGUI(Player):
 
                 cmd = input(f"[{state.turn_no:>3d}] ")
 
-                attempted_cmd = cmd.startswith(":")
+                attempted_cmd = cmd != ""
 
                 if cmd in [":exit", ":quit"]:
                     server_submit_special(
@@ -242,6 +243,14 @@ class PlayerOnlineFancyGUI(Player):
                     return None, True
                 elif cmd == ":test":
                     test_move = True
+                elif cmd.startswith(":chat "):
+                    newMsg = cmd[len(":chat "):]
+                    print(f"The message\n'''\n{newMsg}\n'''\nwill broadcast " +
+                           "to enemy vessels when you make your next manuever.")
+                    if msg is not None:
+                        print("Your previous message has been overwritten.")
+                    msg = newMsg
+                    continue
 
                 fr = self.frontend.move_fr
                 to = self.frontend.move_to
@@ -249,6 +258,8 @@ class PlayerOnlineFancyGUI(Player):
             moving = state.board.piece_at(fr)
             move = None if moving is None else moving.can_move_to(
                 state.board.board, to)
+            if move is not None:
+                move.msg = msg
 
             if moving is None:
                 print("There is no ship there to command!")
@@ -261,7 +272,7 @@ class PlayerOnlineFancyGUI(Player):
             elif test_move:
                 print("That's a valid manuever, captain!")
             elif attempted_cmd:
-                print(f"Command '{cmd[1:]}' not recognized!")
+                print(f"Command '{cmd}' not recognized!")
             else:
                 if state.board.exists_check_after_move(
                     Color.other(self.color), move
@@ -312,6 +323,9 @@ class PlayerOnlineOpponent(Player):
         ):
             print("Your primary vessel is under attack, captain!")
             print("You must perform evasive manuevers!")
+        if move is not None and move.msg is not None:
+            print("Enemy transmission received:")
+            print(f">>> {move.msg}")
         return move, resign
 
             

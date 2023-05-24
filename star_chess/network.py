@@ -19,14 +19,14 @@ def move_key(move_no: int) -> str:
     return f"move-{move_no:03d}"
 
 
-def server_ok_or_fail(data: dict[str, Any]):
+def server_ok_or_fail(data: dict[str, Any], ignore_codes: list[int] = []):
     response = requests.post(
         POST_ENDPOINT,
         data=json.dumps(data),
         headers=HEADERS
     )
 
-    if not response.ok:
+    if not response.ok and response.status_code not in ignore_codes:
         raise ValueError(response.text)
 
 
@@ -41,7 +41,7 @@ def server_submit(username: str, move: Optional[Move], move_no: int):
     if move is None:
         server_submit_special(username, MOVE_PASS, move_no)
     else:
-        server_ok_or_fail({
+        req = {
             "action": "submit",
             "username": username,
             "move": {
@@ -50,14 +50,17 @@ def server_submit(username: str, move: Optional[Move], move_no: int):
                 "capture": move.capture
             },
             "key": move_key(move_no)
-        })
+        }
+        if move.msg is not None:
+            req["move"]["msg"] = move.msg
+        server_ok_or_fail(req)
 
 
 def server_save(username: str):
     server_ok_or_fail({
         "action": "save",
         "username": username
-    })
+    }, [404])
 
 
 def server_submit_special(username: str, move_special: str, move_no: int):
@@ -103,5 +106,6 @@ def server_query(username: str, move_no: int) -> tuple[Optional[Move], bool]:
                     Coord(*moveData["fr"]),
                     Coord(*moveData["to"]),
                     moveData["capture"],
-                    None
+                    None,
+                    moveData.get("msg", None)
                 ), False

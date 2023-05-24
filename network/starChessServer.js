@@ -137,7 +137,7 @@ let server = http.createServer(function(req, res) {
               "msg": `Move log for '${username}' successfully saved.`
             }));
           } else {
-            res.writeHead(400, {"content-type": "application/json"});
+            res.writeHead(404, {"content-type": "application/json"});
             res.end(JSON.stringify({
                 "msg": `No log found for '${username}' to save.`,
                 "req": reqJSON(req),
