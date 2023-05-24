@@ -225,12 +225,12 @@ class PlayerOnlineFancyGUI(Player):
             fr = None
             to = None
             attempted_cmd = False
-            check_move = False
+            test_move = False
             cmd = ""
             
 
             while fr is None or to is None:
-                check_move = False
+                test_move = False
 
                 cmd = input(f"[{state.turn_no:>3d}] ")
 
@@ -240,8 +240,8 @@ class PlayerOnlineFancyGUI(Player):
                     server_submit_special(
                         self.username, MOVE_FORFEIT, state.turn_no)
                     return None, True
-                elif cmd == ":check":
-                    check_move = True
+                elif cmd == ":test":
+                    test_move = True
 
                 fr = self.frontend.move_fr
                 to = self.frontend.move_to
@@ -258,7 +258,7 @@ class PlayerOnlineFancyGUI(Player):
                 print("That ship cannot perform that manuever!")
             elif state.board.exists_check_after_move(self.color, move):
                 print("That manuever would leave your primary vessel under attack!")
-            elif check_move:
+            elif test_move:
                 print("That's a valid manuever, captain!")
             elif attempted_cmd:
                 print(f"Command '{cmd[1:]}' not recognized!")
