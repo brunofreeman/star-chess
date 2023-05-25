@@ -225,6 +225,8 @@ class PlayerOnlineFancyGUI(Player):
             server_submit_special(
                 self.uname, MOVE_FORFEIT, state.turn_no)
             return None, True
+        
+        msg = None
 
         while True:
             fr = None
@@ -232,7 +234,6 @@ class PlayerOnlineFancyGUI(Player):
             attempted_cmd = False
             test_move = False
             cmd = ""
-            msg = None
             
 
             while fr is None or to is None:
@@ -248,7 +249,8 @@ class PlayerOnlineFancyGUI(Player):
                     return None, True
                 elif cmd == ":pass":
                     if state.board.exists_check(self.color):
-                        print("Now's no time to freeze up captain! We're in their crosshairs!")
+                        print("Now's no time to freeze up captain! "+
+                              "We're in their crosshairs!")
                         server_submit_special(
                             self.uname, MOVE_FORFEIT, state.turn_no)
                         return None, True
@@ -290,10 +292,14 @@ class PlayerOnlineFancyGUI(Player):
                 else:
                     print("That's a valid maneuver, captain!")
             elif not test_move and move is None:
-                print("Not possible, captain! We don't have time for commands that can't be followed!")
-                server_submit_special(
-                    self.uname, MOVE_PASS, state.turn_no)
-                return None, False
+                if state.board.exists_check(self.color):
+                    print("That maneuver cannot be made! Defend your primary vessel!")
+                else:
+                    print("Not possible, captain! We don't have time for " +
+                        "commands that can't be followed!")
+                    server_submit_special(
+                        self.uname, MOVE_PASS, state.turn_no)
+                    return None, False
             elif state.board.exists_check_after_move(self.color, move):
                 print("That maneuver would leave your primary vessel under attack!")
             else:
