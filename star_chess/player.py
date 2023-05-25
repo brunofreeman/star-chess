@@ -1,3 +1,7 @@
+# import signal
+import multiprocessing
+import inputimeout
+from thread import ThreadWithReturnValue
 from abc import ABC, abstractmethod
 from typing import Optional
 from frontend import FrontendFancyGUI
@@ -207,20 +211,57 @@ class PlayerFancyGUI(Player):
 class PlayerOnlineFancyGUI(Player):
     color: Color
     frontend: FrontendFancyGUI
-    username: str
-    usernameOpponent: str
+    uname: str
+    uname_opponent: str
+    move_secs: Optional[int]
+    time_expired: bool
+    waiting_for_input: bool
 
     def __init__(
             self, color: Color, frontend: FrontendFancyGUI,
-            username: Optional[str] = None, opponent: Optional[str] = None):
+            username: Optional[str] = None, opponent: Optional[str] = None,
+            move_secs: Optional[int] = None):
         self.color = color
         self.frontend = frontend
-        self.username = self.color.name if username is None else username
-        self.usernameOpponent = \
+        self.uname = self.color.name if username is None else username
+        self.uname_opponent = \
             Color.other(self.color).name if opponent is None else opponent
-        server_clear(self.username)
+        
+        self.move_secs = move_secs
+        # signal.signal(signal.SIGALRM, self.alarm_handle)
+        self.time_expired = False
+        self.waiting_for_input = False
+
+        server_clear(self.uname)
     
+    # def alarm_set(self):
+    #     if self.move_secs is not None:
+    #         print(f"alarm firing in {self.move_secs}s")
+    #         signal.alarm(self.move_secs)
+    
+    # def alarm_cancel(self):
+    #     print("alarm canceled")
+    #     signal.alarm(0)
+
+    # def alarm_handle(self, signum, frame):
+    #     self.time_expired = True
+    #     print("outta time!")
+    #     if self.waiting_for_input:
+    #         print("handler fired during input()")
+    #         raise TimeoutError
+
+    def prompt(self, turn_no: int) -> str:
+        try:
+            cmd = inputimeout.inputimeout(prompt=f"[{turn_no:>3d}] ", timeout=5)
+        except inputimeout.TimeoutOccurred:
+            print("we here")
+            cmd = ":pass"
+        return cmd
+
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
+        self.time_expired = False
+        # self.alarm_set()
+
         while True:
             fr = None
             to = None
@@ -229,18 +270,42 @@ class PlayerOnlineFancyGUI(Player):
             cmd = ""
             msg = None
             
-
             while fr is None or to is None:
+                if self.time_expired:
+                    print("You've got to act fast, captain! The enemy is outmaneuvering us!")
+                    server_submit_special(self.uname, MOVE_PASS, state.turn_no)
+                    # self.alarm_cancel()
+                    return None, False
+                
                 test_move = False
 
-                cmd = input(f"[{state.turn_no:>3d}] ")
+                # try:
+                #     self.waiting_for_input = True
+                #     cmd = input(f"[{state.turn_no:>3d}] ")
+                #     self.waiting_for_input = False
+                # except TimeoutError:
+                #     print("in except!")
+                #     cmd = ":pass"
+                
+                prompt_thread = ThreadWithReturnValue(
+                    target=lambda: self.prompt(state.turn_no))
+
+                prompt_thread.start()
+
+                cmd = prompt_thread.join()
 
                 attempted_cmd = cmd != ""
 
                 if cmd in [":exit", ":quit"]:
                     server_submit_special(
-                        self.username, MOVE_FORFEIT, state.turn_no)
+                        self.uname, MOVE_FORFEIT, state.turn_no)
+                    # self.alarm_cancel()
                     return None, True
+                elif cmd == ":pass":
+                    server_submit_special(
+                        self.uname, MOVE_PASS, state.turn_no)
+                    # self.alarm_cancel()
+                    return None, False
                 elif cmd == ":test":
                     test_move = True
                 elif cmd.startswith(":chat "):
@@ -254,6 +319,9 @@ class PlayerOnlineFancyGUI(Player):
 
                 fr = self.frontend.move_fr
                 to = self.frontend.move_to
+
+                if attempted_cmd:
+                    print(f"Command '{cmd}' not recognized!")
             
             moving = state.board.piece_at(fr)
             move = None if moving is None else moving.can_move_to(
@@ -271,14 +339,13 @@ class PlayerOnlineFancyGUI(Player):
                 print("That manuever would leave your primary vessel under attack!")
             elif test_move:
                 print("That's a valid manuever, captain!")
-            elif attempted_cmd:
-                print(f"Command '{cmd}' not recognized!")
             else:
                 if state.board.exists_check_after_move(
                     Color.other(self.color), move
                 ):
                     print("You've put the enemy's primary vessel under attack!")
-                server_submit(self.username, move, state.turn_no)
+                server_submit(self.uname, move, state.turn_no)
+                # self.alarm_cancel()
                 return move, False
 
     def play_again(self) -> bool:
@@ -303,7 +370,7 @@ class PlayerOnlineFancyGUI(Player):
         pass
 
     def round_end(self):
-        server_save(self.username)
+        server_save(self.uname)
 
 
 class PlayerOnlineOpponent(Player):

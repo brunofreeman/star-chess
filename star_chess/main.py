@@ -45,7 +45,7 @@ def main(argv):
 
     frontend = FrontendFancyGUI()
 
-    user = PlayerOnlineFancyGUI(color, frontend, username, opponent)
+    user = PlayerOnlineFancyGUI(color, frontend, username, opponent, 5)
 
     game = Game(
         "./spec/standard.json",
