@@ -284,12 +284,18 @@ class PlayerOnlineFancyGUI(Player):
                 print("There is no ship there to command!")
             elif moving.color is not self.color:
                 print("You cannot command an enemy vessel!")
-            elif move is None:
-                print("That ship cannot perform that manuever!")
+            elif test_move:
+                if move is None:
+                    print("That ship cannot perform that manuever!")
+                else:
+                    print("That's a valid manuever, captain!")
+            elif not test_move and move is None:
+                print("Not possible, captain! We don't have time for commands that can't be followed!")
+                server_submit_special(
+                    self.uname, MOVE_PASS, state.turn_no)
+                return None, False
             elif state.board.exists_check_after_move(self.color, move):
                 print("That manuever would leave your primary vessel under attack!")
-            elif test_move:
-                print("That's a valid manuever, captain!")
             else:
                 if state.board.exists_check_after_move(
                     Color.other(self.color), move
@@ -348,7 +354,7 @@ class PlayerOnlineOpponent(Player):
             print("Enemy transmission received:")
             print(f">>> {move.msg}")
         if move is None and not resign:
-            print("The enemy is immobilized! Now's your chance!")
+            print("The enemy is faltering! Now's your chance!")
         return move, resign
 
             
