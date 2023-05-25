@@ -11,6 +11,4 @@
     - castling
     - hyperdrive
 - quality of life
-  - checkmate detection
-  - let window linger after win/loss
   - show board notation

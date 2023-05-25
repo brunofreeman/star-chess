@@ -147,6 +147,37 @@ class Board:
             self.add_piece(restore.type, restore.color, restore.loc)
         
         return check_exists
+
+    # we will consider stalemate as checkmate
+    def is_checkmated(self, color: Color) -> int:
+        if not self.exists_check(color):
+            return False
+
+        def can_move_and_no_check_after(p: Piece, to: Coord) -> bool:
+            move = p.can_move_to(self.board, to)
+            if move is None:
+                return False
+            return not self.exists_check_after_move(color, move)
+
+        # this certainly could be done more efficiently, but it's fast enough
+        return not any(
+            any(
+                self.piece_at(r, c) is not None and
+                self.piece_at(r, c).color is color and
+                any (
+                    any(
+                        can_move_and_no_check_after(
+                            self.piece_at(r, c),
+                            Coord(rto, cto)
+                        )
+                        for cto in range(self.n_cols)
+                    )
+                    for rto in range(self.n_rows)
+                )
+                for c in range(self.n_cols)
+            )
+            for r in range(self.n_rows)
+        )
         
     def __str__(self) -> str:
         # char_codes = [

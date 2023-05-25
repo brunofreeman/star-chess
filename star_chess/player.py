@@ -218,9 +218,14 @@ class PlayerOnlineFancyGUI(Player):
         self.uname = self.color.name if username is None else username
         self.uname_opponent = \
             Color.other(self.color).name if opponent is None else opponent
-        server_clear(self.uname)
     
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
+        if state.board.is_checkmated(self.color):
+            print("There's no escape! You've been checkmated!")
+            server_submit_special(
+                self.uname, MOVE_FORFEIT, state.turn_no)
+            return None, True
+
         while True:
             fr = None
             to = None
@@ -242,9 +247,16 @@ class PlayerOnlineFancyGUI(Player):
                         self.uname, MOVE_FORFEIT, state.turn_no)
                     return None, True
                 elif cmd == ":pass":
-                    server_submit_special(
-                        self.uname, MOVE_PASS, state.turn_no)
-                    return None, False
+                    if state.board.exists_check(self.color):
+                        print("Now's no time to freeze up captain! We're in their crosshairs!")
+                        server_submit_special(
+                            self.uname, MOVE_FORFEIT, state.turn_no)
+                        return None, True
+                    else:
+                        print("Thanks for being honest, captain :)")
+                        server_submit_special(
+                            self.uname, MOVE_PASS, state.turn_no)
+                        return None, False
                 elif cmd == ":test":
                     test_move = True
                 elif cmd.startswith(":chat "):
@@ -300,12 +312,16 @@ class PlayerOnlineFancyGUI(Player):
 
     def game_end(self, state: State):
         if state.winner == self.color:
-            print("Well fought, captain!")
+            print("Well fought, captain! You won the battle!")
         else:
-            print("Retreat for now, captain!")
+            print("Retreat for now, captain! Better luck next time!")
+        input("Press [enter] to exit. And then ask your alumni if you have time to play again!")
 
     def round_begin(self):
-        pass
+        if self.color is Color.WHITE:
+            server_clear(self.uname)
+            server_clear(self.uname_opponent)
+
 
     def round_end(self):
         server_save(self.uname)
@@ -331,6 +347,8 @@ class PlayerOnlineOpponent(Player):
         if move is not None and move.msg is not None:
             print("Enemy transmission received:")
             print(f">>> {move.msg}")
+        if move is None and not resign:
+            print("The enemy is immobilized! Now's your chance!")
         return move, resign
 
             
