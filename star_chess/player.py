@@ -207,18 +207,18 @@ class PlayerFancyGUI(Player):
 class PlayerOnlineFancyGUI(Player):
     color: Color
     frontend: FrontendFancyGUI
-    username: str
-    usernameOpponent: str
+    uname: str
+    uname_opponent: str
 
     def __init__(
             self, color: Color, frontend: FrontendFancyGUI,
             username: Optional[str] = None, opponent: Optional[str] = None):
         self.color = color
         self.frontend = frontend
-        self.username = self.color.name if username is None else username
-        self.usernameOpponent = \
+        self.uname = self.color.name if username is None else username
+        self.uname_opponent = \
             Color.other(self.color).name if opponent is None else opponent
-        server_clear(self.username)
+        server_clear(self.uname)
     
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         while True:
@@ -239,8 +239,12 @@ class PlayerOnlineFancyGUI(Player):
 
                 if cmd in [":exit", ":quit"]:
                     server_submit_special(
-                        self.username, MOVE_FORFEIT, state.turn_no)
+                        self.uname, MOVE_FORFEIT, state.turn_no)
                     return None, True
+                elif cmd == ":pass":
+                    server_submit_special(
+                        self.uname, MOVE_PASS, state.turn_no)
+                    return None, False
                 elif cmd == ":test":
                     test_move = True
                 elif cmd.startswith(":chat "):
@@ -254,6 +258,9 @@ class PlayerOnlineFancyGUI(Player):
 
                 fr = self.frontend.move_fr
                 to = self.frontend.move_to
+
+                if attempted_cmd:
+                    print(f"Command '{cmd}' not recognized!")
             
             moving = state.board.piece_at(fr)
             move = None if moving is None else moving.can_move_to(
@@ -271,14 +278,12 @@ class PlayerOnlineFancyGUI(Player):
                 print("That manuever would leave your primary vessel under attack!")
             elif test_move:
                 print("That's a valid manuever, captain!")
-            elif attempted_cmd:
-                print(f"Command '{cmd}' not recognized!")
             else:
                 if state.board.exists_check_after_move(
                     Color.other(self.color), move
                 ):
                     print("You've put the enemy's primary vessel under attack!")
-                server_submit(self.username, move, state.turn_no)
+                server_submit(self.uname, move, state.turn_no)
                 return move, False
 
     def play_again(self) -> bool:
@@ -303,7 +308,7 @@ class PlayerOnlineFancyGUI(Player):
         pass
 
     def round_end(self):
-        server_save(self.username)
+        server_save(self.uname)
 
 
 class PlayerOnlineOpponent(Player):
