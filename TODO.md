@@ -9,6 +9,5 @@
   - asteroids
   - special moves
     - castling
-    - hyperdrive
 - quality of life
   - show board notation

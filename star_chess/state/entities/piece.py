@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Optional
-from .move.move import Move
+from .move.move import Move, SpecialMove
 from .move.coord import Coord
 from .color.color import Color
 
@@ -153,7 +153,9 @@ class Piece(ABC):
         return PieceType.from_class(self.dummy().__class__)
     
     @abstractmethod
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(
+        self, board: list[list[Optional[Piece]]], to: Coord,
+        special: Optional[SpecialMove] = None) -> Optional[Move]:
         pass
 
     @abstractmethod
@@ -175,12 +177,22 @@ class King(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
             return None
         
         if color_at(board, to) == self.color:
             return None
+        
+        if special is SpecialMove.HYPERDRIVE:
+            if color_at(board, to) is None:
+                return Move(
+                    self.loc,
+                    to,
+                    False
+                )
+            else:
+                return None
 
         dr = to.r - self.loc.r
         dc = to.c - self.loc.c
@@ -225,7 +237,7 @@ class Rook(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
             return None
         
@@ -284,7 +296,7 @@ class Sergeant(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
             return None
         
@@ -336,7 +348,7 @@ class Wamazon(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (
             Rook(self.color, self.loc, None).can_move_to(board, to) or
             Bishop(self.color, self.loc, None).can_move_to(board, to) or
@@ -363,7 +375,7 @@ class Bishop(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
             return None
         
@@ -404,7 +416,7 @@ class Knight(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
             return None
         
@@ -436,7 +448,7 @@ class Camel(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
             return None
         
@@ -468,7 +480,7 @@ class Wildebeest(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (
             Knight(self.color, self.loc, None).can_move_to(board, to) or
             Camel(self.color, self.loc, None).can_move_to(board, to)
@@ -494,7 +506,7 @@ class Queen(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (
             Rook(self.color, self.loc, None).can_move_to(board, to) or
             Bishop(self.color, self.loc, None).can_move_to(board, to)
@@ -520,7 +532,7 @@ class Chancellor(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (
             Rook(self.color, self.loc, None).can_move_to(board, to) or
             Knight(self.color, self.loc, None).can_move_to(board, to)
@@ -546,7 +558,7 @@ class Archbishop(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (
             Bishop(self.color, self.loc, None).can_move_to(board, to) or
             Knight(self.color, self.loc, None).can_move_to(board, to)
@@ -572,7 +584,7 @@ class Grasshopper(Piece):
     loc: Coord
     id: int
 
-    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord) -> Optional[Move]:
+    def can_move_to(self, board: list[list[Optional[Piece]]], to: Coord, special: Optional[SpecialMove] = None) -> Optional[Move]:
         if not (0 <= to.r < len(board)) or not (0 <= to.c < len(board[0])):
             return None
         

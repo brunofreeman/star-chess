@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 
 class SpecialMove(Enum):
-    pass
+    HYPERDRIVE = 0
 
 
 @dataclass

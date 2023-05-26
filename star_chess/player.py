@@ -4,7 +4,7 @@ from frontend import FrontendFancyGUI
 from network import MOVE_PASS, MOVE_FORFEIT, server_clear, server_submit, \
     server_submit_special, server_query, server_save
 from state.entities.color.color import Color
-from state.entities.move.move import Move
+from state.entities.move.move import Move, SpecialMove
 from state.entities.move.coord import Coord
 from state.state import State
 
@@ -209,6 +209,7 @@ class PlayerOnlineFancyGUI(Player):
     frontend: FrontendFancyGUI
     uname: str
     uname_opponent: str
+    used_hyperdrive: bool
 
     def __init__(
             self, color: Color, frontend: FrontendFancyGUI,
@@ -218,6 +219,7 @@ class PlayerOnlineFancyGUI(Player):
         self.uname = self.color.name if username is None else username
         self.uname_opponent = \
             Color.other(self.color).name if opponent is None else opponent
+        self.used_hyperdrive = False
     
     def get_move(self, state: State) -> tuple[Optional[Move], bool]:
         if state.board.is_checkmated(self.color):
@@ -233,11 +235,13 @@ class PlayerOnlineFancyGUI(Player):
             to = None
             attempted_cmd = False
             test_move = False
+            hyperdrive = False
             cmd = ""
             
 
             while fr is None or to is None:
                 test_move = False
+                hyperdrive = False
 
                 cmd = input(f"[{state.turn_no:>3d}] ")
 
@@ -269,16 +273,23 @@ class PlayerOnlineFancyGUI(Player):
                         print("Your previous message has been overwritten.")
                     msg = newMsg
                     continue
+                elif cmd == ":hyperdrive":
+                    if self.used_hyperdrive:
+                        print("No can do, captain! The corvette can only use hyperdrive once!")
+                        continue
+                    else:
+                        hyperdrive = True
+                elif attempted_cmd:
+                    print(f"Command '{cmd}' not recognized!")
+                    continue
 
                 fr = self.frontend.move_fr
                 to = self.frontend.move_to
 
-                if attempted_cmd:
-                    print(f"Command '{cmd}' not recognized!")
-            
             moving = state.board.piece_at(fr)
             move = None if moving is None else moving.can_move_to(
-                state.board.board, to)
+                state.board.board, to,
+                SpecialMove.HYPERDRIVE if hyperdrive else None)
             if move is not None:
                 move.msg = msg
 
@@ -293,7 +304,7 @@ class PlayerOnlineFancyGUI(Player):
                     print("That's a valid maneuver, captain!")
             elif not test_move and move is None:
                 if state.board.exists_check(self.color):
-                    print("That maneuver cannot be made! Defend your primary vessel!")
+                    print("That maneuver cannot be made! Defend your corvette!")
                 else:
                     print("Not possible, captain! We don't have time for " +
                         "commands that can't be followed!")
@@ -301,12 +312,14 @@ class PlayerOnlineFancyGUI(Player):
                         self.uname, MOVE_PASS, state.turn_no)
                     return None, False
             elif state.board.exists_check_after_move(self.color, move):
-                print("That maneuver would leave your primary vessel under attack!")
+                print("That maneuver would leave your corvette under attack!")
             else:
                 if state.board.exists_check_after_move(
                     Color.other(self.color), move
                 ):
-                    print("You've put the enemy's primary vessel under attack!")
+                    print("You've put the enemy's corvette under attack!")
+                if hyperdrive:
+                    self.used_hyperdrive = True
                 server_submit(self.uname, move, state.turn_no)
                 return move, False
 
@@ -327,9 +340,11 @@ class PlayerOnlineFancyGUI(Player):
             print("Well fought, captain! You won the battle!")
         else:
             print("Retreat for now, captain! Better luck next time!")
-        input("Press [enter] to exit. And then ask your alumni if you have time to play again!")
+        input("Press [enter] to exit. " +
+              "And then ask your alumni if you have time to play again!")
 
     def round_begin(self):
+        self.used_hyperdrive = False
         if self.color is Color.WHITE:
             server_clear(self.uname)
             server_clear(self.uname_opponent)
@@ -354,7 +369,7 @@ class PlayerOnlineOpponent(Player):
             move is not None and
             state.board.exists_check_after_move(Color.other(self.color), move)
         ):
-            print("Your primary vessel is under attack, captain!")
+            print("Your corvette vessel is under attack, captain!")
             print("You must perform evasive maneuvers!")
         if move is not None and move.msg is not None:
             print("Enemy transmission received:")
